@@ -141,10 +141,11 @@ $$\text{Available Funds} = \sum(\text{Successful Donations}) - \sum(\text{Approv
 - MySQL Server 8.0+ running locally on port 3306
 - Git or extracted project source directory
 
-### Step 1: Navigate to Project Directory
-```bash
-cd D:\Heritage_Hub\Heritagehub
-```
+### Step 1: Clone the Repository
+   ```bash
+   git clone https://github.com/sanjaysatheesh57/Heritage-Hub.git
+   cd Heritage-Hub
+   ```
 
 ### Step 2: Initialize & Activate Virtual Environment
 ```bash
