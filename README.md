@@ -169,14 +169,14 @@ pip install -r requirements.txt
    ```sql
    CREATE DATABASE heritagehub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
-3. Verify connection credentials in `Heritagehub/settings.py`:
+3. Open `Heritagehub/settings.py` and use your own MySQL credentials:
    ```python
    DATABASES = {
        'default': {
            'ENGINE': 'django.db.backends.mysql',
            'NAME': 'heritagehub',
            'USER': 'root',
-           'PASSWORD': '',       # Enter your local MySQL root password if applicable
+           'PASSWORD': '',       # Use your own MySQL password
            'HOST': '127.0.0.1',
            'PORT': '3306',
        }
@@ -194,11 +194,12 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### Step 7: Load Demonstration Seed Data (Optional)
-Restore baseline sample institutions, assets, users, and demonstration records:
-```bash
-python manage.py loaddata mysql_restore.json
-```
+### Step 7: Load Demo User Accounts (Optional)
+   Load demo user accounts (Admin, Trustee, Staff, Devotee) so you can log in and explore each portal:
+   ```bash
+   python manage.py loaddata mysql_restore.json
+   ```
+   These accounts are for local testing only.
 
 ### Step 8: Launch the Development Server
 ```bash
