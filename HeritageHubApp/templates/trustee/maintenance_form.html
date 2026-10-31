@@ -1,0 +1,183 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit Maintenance: {{ maintenance.title }}{% else %}Schedule Maintenance{% endif %} - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        background: #fff;
+        overflow: hidden;
+    }
+    .form-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.5rem 2rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .inst-locked-banner {
+        background-color: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+        padding: 0.85rem 1.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb / Back Navigation -->
+    <div class="mb-3">
+        <a href="{% if is_edit %}{% url 'trustee_maintenance_detail' maintenance.id %}{% else %}{% url 'trustee_maintenance_list' %}{% endif %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>{% if is_edit %}Back to Maintenance Details{% else %}Back to Maintenance List{% endif %}
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="form-card">
+                <!-- Header -->
+                <div class="form-header">
+                    <h4 class="fw-bold mb-1 text-white">
+                        <i class="bi {% if is_edit %}bi-pencil-square{% else %}bi-tools{% endif %} text-warning me-2"></i>
+                        {% if is_edit %}Edit Maintenance: {{ maintenance.title }}{% else %}Schedule Conservation & Maintenance Work{% endif %}
+                    </h4>
+                    <p class="text-light opacity-75 small mb-0">
+                        Record routine preservation, restorative treatment, or statutory upkeep for cultural assets
+                    </p>
+                </div>
+
+                <div class="p-4 p-md-5">
+
+                    <!-- Institution Locked Notice -->
+                    <div class="inst-locked-banner mb-4 d-flex align-items-center">
+                        <i class="bi bi-bank2 text-warning fs-4 me-3"></i>
+                        <div>
+                            <span class="text-muted small d-block">Custodial Institution (Server-Assigned)</span>
+                            <span class="fw-bold text-dark">{{ institution.name }}</span>
+                            <span class="badge bg-secondary ms-2">{{ institution.get_institution_type_display }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Validation Errors -->
+                    {% if errors %}
+                        <div class="alert alert-danger mb-4" role="alert">
+                            <h6 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please correct the following errors:</h6>
+                            <ul class="mb-0 ps-3">
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <!-- Form -->
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <!-- Maintenance Title -->
+                            <div class="col-12">
+                                <label for="title" class="form-label fw-semibold">Activity / Maintenance Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="title" name="title"
+                                       value="{% if form_data %}{{ form_data.title }}{% elif is_edit %}{{ maintenance.title }}{% endif %}"
+                                       placeholder="e.g., Panchaloha Idol Chemical Preservation & Wax Coating, Chariot Wooden Wheel Oiling" required>
+                            </div>
+
+                            <!-- Linked Asset Dropdown -->
+                            <div class="col-md-6">
+                                <label for="asset_id" class="form-label fw-semibold">Target Heritage Asset</label>
+                                <select class="form-select" id="asset_id" name="asset_id">
+                                    <option value="">-- General Premises / No Specific Asset --</option>
+                                    {% for asset in assets %}
+                                        <option value="{{ asset.id }}"
+                                            {% if form_data.asset_id == asset.id|stringformat:"s" %}selected
+                                            {% elif is_edit and maintenance.asset_id == asset.id %}selected
+                                            {% elif preselected_asset_id == asset.id|stringformat:"s" %}selected
+                                            {% endif %}>
+                                            {{ asset.name }} ({{ asset.category }} &bull; {{ asset.asset_type }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Restricted strictly to assets cataloged by {{ institution.name }}.</div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6">
+                                <label for="status" class="form-label fw-semibold">Work Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    {% for val, label in maintenance_statuses %}
+                                        <option value="{{ val }}" {% if form_data.status == val or is_edit and maintenance.status == val %}selected{% elif not is_edit and val == 'Scheduled' %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Scheduled Date & Completion Date -->
+                            <div class="col-md-6">
+                                <label for="scheduled_date" class="form-label fw-semibold">Scheduled Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="scheduled_date" name="scheduled_date"
+                                       value="{% if form_data %}{{ form_data.scheduled_date }}{% elif is_edit %}{{ maintenance.scheduled_date|date:'Y-m-d' }}{% endif %}" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="completion_date" class="form-label fw-semibold">Completion Date (Optional)</label>
+                                <input type="date" class="form-control" id="completion_date" name="completion_date"
+                                       value="{% if form_data %}{{ form_data.completion_date }}{% elif is_edit and maintenance.completion_date %}{{ maintenance.completion_date|date:'Y-m-d' }}{% endif %}">
+                                <div class="form-text">Leave blank if work is still pending or in progress.</div>
+                            </div>
+
+                            <!-- Estimated Cost -->
+                            <div class="col-md-6">
+                                <label for="estimated_cost" class="form-label fw-semibold">Estimated Cost (₹)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="estimated_cost" name="estimated_cost"
+                                           value="{% if form_data %}{{ form_data.estimated_cost }}{% elif is_edit %}{{ maintenance.estimated_cost }}{% else %}0.00{% endif %}"
+                                           placeholder="0.00">
+                                </div>
+                            </div>
+
+                            <!-- Actual Cost -->
+                            <div class="col-md-6">
+                                <label for="actual_cost" class="form-label fw-semibold">Actual Spent Cost (₹)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="actual_cost" name="actual_cost"
+                                           value="{% if form_data %}{{ form_data.actual_cost }}{% elif is_edit %}{{ maintenance.actual_cost }}{% else %}0.00{% endif %}"
+                                           placeholder="0.00">
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <label for="description" class="form-label fw-semibold">Work Scope & Conservation Notes</label>
+                                <textarea class="form-control" id="description" name="description" rows="4"
+                                          placeholder="Detail the materials used, certified conservation methodology, participating artisans/contractors, and results...">{% if form_data %}{{ form_data.description }}{% elif is_edit %}{{ maintenance.description }}{% endif %}</textarea>
+                                <div class="form-text">Document structural observations, chemical treatments, and preservation outcomes.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <a href="{% if is_edit %}{% url 'trustee_maintenance_detail' maintenance.id %}{% else %}{% url 'trustee_maintenance_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-heritage-primary px-4">
+                                <i class="bi {% if is_edit %}bi-check-lg{% else %}bi-tools{% endif %} me-1"></i>
+                                {% if is_edit %}Save Changes{% else %}Schedule Maintenance{% endif %}
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

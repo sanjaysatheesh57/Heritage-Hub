@@ -1,0 +1,6 @@
+# HeritageHub — Dependencies for Cultural Heritage Asset and Trust Management Information System
+# Python 3.12+ compatible
+Django==5.0
+mysqlclient==2.2.1
+reportlab==5.0.0
+Pillow==12.0.0

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>HeritageHub - Database Tables Specification</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  body {
+    font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.4;
+    color: #292524;
+    padding: 30px;
+  }
+  h1 {
+    color: #9a3412;
+    font-size: 22pt;
+    margin-bottom: 4px;
+    border-bottom: 2px solid #9a3412;
+    padding-bottom: 6px;
+  }
+  .subtitle {
+    color: #78716c;
+    font-size: 12pt;
+    font-style: italic;
+    margin-bottom: 25px;
+  }
+  .table-title {
+    color: #1c1917;
+    font-size: 13pt;
+    font-weight: bold;
+    margin-top: 28px;
+    margin-bottom: 8px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 24px;
+    mso-table-lspace: 0pt;
+    mso-table-rspace: 0pt;
+  }
+  th {
+    background-color: #d97706;
+    color: #ffffff;
+    font-weight: bold;
+    text-align: left;
+    padding: 8px 10px;
+    border: 1px solid #b45309;
+    font-size: 10.5pt;
+  }
+  td {
+    padding: 7px 10px;
+    border: 1px solid #d6d3d1;
+    font-size: 10pt;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td {
+    background-color: #fbfbf9;
+  }
+  .pk {
+    font-weight: bold;
+    color: #b45309;
+  }
+  .fk {
+    color: #0369a1;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<h1>HERITAGEHUB</h1>
+<div class="subtitle">Cultural Heritage Asset and Trust Management Information System &mdash; Database Schema Specification (9 Tables)</div>
+
+<div class="table-title">1. HeritageHubApp_institution: Stores registered heritage institution details</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 20%;">Constraints</th>
+      <th style="width: 45%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>BigInt(20)</td>
+      <td class="pk">Primary Key</td>
+      <td>Institution ID</td>
+    </tr>
+    <tr>
+      <td><b>name</b></td>
+      <td>Varchar(200)</td>
+      <td>Not Null</td>
+      <td>Name of the institution</td>
+    </tr>
+    <tr>
+      <td><b>institution_type</b></td>
+      <td>Varchar(50)</td>
+      <td>Not Null</td>
+      <td>Type (Temple, Trust, Heritage)</td>
+    </tr>
+    <tr>
+      <td><b>address</b></td>
+      <td>Text</td>
+      <td>Not Null</td>
+      <td>Institution physical address</td>
+    </tr>
+    <tr>
+      <td><b>registration_certificate</b></td>
+      <td>Varchar(100)</td>
+      <td>Nullable</td>
+      <td>Document file path</td>
+    </tr>
+    <tr>
+      <td><b>pan</b></td>
+      <td>Varchar(20)</td>
+      <td>Nullable</td>
+      <td>PAN / Tax identifier</td>
+    </tr>
+    <tr>
+      <td><b>authorized_representative</b></td>
+      <td>Varchar(150)</td>
+      <td>Not Null</td>
+      <td>Authorized representative name</td>
+    </tr>
+    <tr>
+      <td><b>contact_number</b></td>
+      <td>Varchar(20)</td>
+      <td>Not Null</td>
+      <td>Contact phone number</td>
+    </tr>
+    <tr>
+      <td><b>email</b></td>
+      <td>Varchar(254)</td>
+      <td>Not Null</td>
+      <td>Official email address</td>
+    </tr>
+    <tr>
+      <td><b>approval_status</b></td>
+      <td>Varchar(20)</td>
+      <td>Not Null</td>
+      <td>Status (Pending / Approved / Rejected)</td>
+    </tr>
+    <tr>
+      <td><b>registered_date</b></td>
+      <td>DateTime</td>
+      <td>Not Null</td>
+      <td>Registration date and time</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="table-title">2. HeritageHubApp_userprofile: Stores user role and institution linkage</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 20%;">Constraints</th>
+      <th style="width: 45%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>BigInt(20)</td>
+      <td class="pk">Primary Key</td>
+      <td>Profile ID</td>
+    </tr>
+    <tr>
+      <td><b>user_id</b></td>
+      <td>Int(11)</td>
+      <td class="fk">Foreign Key, Unique</td>
+      <td>FK -&gt; auth_user</td>
+    </tr>
+    <tr>
+      <td><b>role</b></td>
+      <td>Varchar(20)</td>
+      <td>Not Null</td>
+      <td>Role (Devotee, Staff, Trustee, Officer)</td>
+    </tr>
+    <tr>
+      <td><b>institution_id</b></td>
+      <td>BigInt(20)</td>
+      <td class="fk">Foreign Key, Nullable</td>
+      <td>FK -&gt; HeritageHubApp_institution</td>
+    </tr>
+    <tr>
+      <td><b>phone</b></td>
+      <td>Varchar(20)</td>
+      <td>Nullable</td>
+      <td>User phone number</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="table-title">3. HeritageHubApp_asset: Stores heritage asset records</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 20%;">Constraints</th>
+      <th style="width: 45%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>BigInt(20)</td>
+      <td class="pk">Primary Key</td>
+      <td>Asset ID</td>
+    </tr>
+    <tr>
+      <td><b>institution_id</b></td>
+      <td>BigInt(20)</td>
+      <td class="fk">Foreign Key</td>
+      <td>FK -&gt; HeritageHubApp_institution</td>
+    </tr>
+    <tr>
+      <td><b>name</b></td>
+      <td>Varchar(200)</td>
+      <td>Not Null</td>
+      <td>Heritage asset name</td>
+    </tr>
+    <tr>
+      <td><b>asset_type</b></td>
+      <td>Varchar(20)</td>
+      <td>Not Null</td>
+      <td>Type (Movable, Immovable)</td>
+    </tr>
+    <tr>
+      <td><b>category</b></td>
+      <td>Varchar(100)</td>
+      <td>Not Null</td>
+      <td>Asset category (e.g. Deity Idol, Structure)</td>
+    </tr>
+    <tr>
+      <td><b>description</b></td>
+      <td>Text</td>
+      <td>Nullable</td>
+      <td>Historical description &amp; inscriptions</td>
+    </tr>
+    <tr>
+      <td><b>photograph</b></td>
+      <td>Varchar(100)</td>
+      <td>Nullable</td>
+      <td>Asset photograph image path</td>
+    </tr>
+    <tr>
+      <td><b>current_valuation</b></td>
+      <td>Decimal(15,2)</td>
+      <td>Not Null</td>
+      <td>Current estimated valuation in &#8377;</td>
+    </tr>
+    <tr>
+      <td><b>condition</b></td>
+      <td>Varchar(30)</td>
+      <td>Not Null</td>
+      <td>Condition (Excellent / Good / Needs Maintenance / Damaged)</td>
+    </tr>
+    <tr>
+      <td><b>location</b></td>
+      <td>Varchar(200)</td>
+      <td>Not Null</td>
+      <td>Storage / placement location on premises</td>
+    </tr>
+    <tr>
+      <td><b>date_acquired</b></td>
+      <td>Date</td>
+      <td>Nullable</td>
+      <td>Acquisition / consecration date</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="table-title">4. HeritageHubApp_donation: Records online and cash donations</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 20%;">Constraints</th>
+      <th style="width: 45%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>BigInt(20)</td>
+      <td class="pk">Primary Key</td>
+      <td>Donation ID</td>
+    </tr>
+    <tr>
+      <td><b>institution_id</b></td>
+      <td>BigInt(20)</td>
+      <td class="fk">Foreign Key</td>
+      <td>FK -&gt; HeritageHubApp_institution</td>
+    </tr>
+    <tr>
+      <td><b>donor_id</b></td>
+      <td>Int(11)</td>
+      <td class="fk">Foreign Key, Nullable</td>
+      <td>FK -&gt; auth_user</td>
+    </tr>
+    <tr>
+      <td><b>donor_name</b></td>
+      <td>Varchar(150)</td>
+      <td>Not Null</td>
+      <td>Donor full name</td>
+    </tr>
+    <tr>
+      <td><b>donor_email</b></td>
+      <td>Varchar(254)</td>
+      <td>Nullable</td>
+      <td>Donor email address</td>
+    </tr>
+    <tr>
+      <td><b>amount</b></td>
+      <td>Decimal(12,2)</td>
+      <td>Not Null</td>
+      <td>Donation offering amount in &#8377;</td>
+    </tr>
+    <tr>
+      <td><b>donation_type</b></td>
+      <td>Varchar(20)</td>
+      <td>Not Null</td>
+      <td>Channel (Online, Cash)</td>
+    </tr>
+    <tr>
+      <td><b>purpose</b></td>
+      <td>Varchar(200)</td>
+      <td>Not Null</td>
+      <td>Offering purpose (e.g. Annadanam, Maintenance)</td>
+    </tr>
+    <tr>
+      <td><b>payment_status</b></td>
+      <td>Varchar(20)</td>
+      <td>Not Null</td>
+      <td>Status (Pending, Success, Failed)</td>
+    </tr>
+    <tr>
+      <td><b>transaction_id</b></td>
+      <td>Varchar(100)</td>
+      <td>Nullable</td>
+      <td>Transaction / reference ID</td>
+    </tr>
+    <tr>
+      <td><b>donation_date</b></td>
+      <td>DateTime</td>
+      <td>Not Null</td>
+      <td>Donation date and time</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="table-title">5. HeritageHubApp_receipt: Stores generated donation receipts</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 20%;">Constraints</th>
+      <th style="width: 45%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>BigInt(20)</td>
+      <td class="pk">Primary Key</td>
+      <td>Receipt ID</td>
+    </tr>
+    <tr>
+      <td><b>donation_id</b></td>
+      <td>BigInt(20)</td>
+      <td class="fk">Foreign Key, Unique</td>
+      <td>FK -&gt; HeritageHubApp_donation</td>
+    </tr>
+    <tr>
+      <td><b>receipt_number</b></td>
+      <td>Varchar(50)</td>
+      <td>Unique, Not Null</td>
+      <td>Unique receipt voucher number</td>
+    </tr>
+    <tr>
+      <td><b>generated_date</b></td>
+      <td>DateTime</td>
+      <td>Not Null</td>
+      <td>Receipt generation timestamp</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="table-title">6. HeritageHubApp_expense: Records institutional expenses and approvals</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 20%;">Constraints</th>
+      <th style="width: 45%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>BigInt(20)</td>
+      <td class="pk">Primary Key</td>
+      <td>Expense ID</td>
+    </tr>
+    <tr>
+      <td><b>institution_id</b></td>
+      <td>BigInt(20)</td>
+      <td class="fk">Foreign Key</td>
+      <td>FK -&gt; HeritageHubApp_institution</td>
+    </tr>
+    <tr>
+      <td><b>donation_id</b></td>
+      <td>BigInt(20)</td>
+      <td class="fk">Foreign Key, Nullable</td>
+      <td>FK -&gt; HeritageHubApp_donation</td>
+    </tr>
+    <tr>
+      <td><b>title</b></td>
+      <td>Varchar(200)</td>
+      <td>Not Null</td>
+      <td>Expense title / purpose</td>
+    </tr>
+    <tr>
+      <td><b>description</b></td>
+      <td>Text</td>
+      <td>Nullable</td>
+      <td>Expenditure description</td>
+    </tr>
+    <tr>
+      <td><b>category</b></td>
+      <td>Varchar(100)</td>
+      <td>Not Null</td>
+      <td>Expense category (e.g. Rituals, Repairs)</td>
+    </tr>
+    <tr>
+      <td><b>amount</b></td>
+      <td>Decimal(12,2)</td>
+      <td>Not Null</td>
+      <td>Disbursed amount in &#8377;</td>
+    </tr>
+    <tr>
+      <td><b>date</b></td>
+      <td>Date</td>
+      <td>Not Null</td>
+      <td>Expense incurred date</td>
+    </tr>
+    <tr>
+      <td><b>status</b></td>
+      <td>Varchar(20)</td>
+      <td>Not Null</td>
+      <td>Status (Pending, Approved, Rejected)</td>
+    </tr>
+    <tr>
+      <td><b>approved_by_id</b></td>
+      <td>Int(11)</td>
+      <td class="fk">Foreign Key, Nullable</td>
+      <td>FK -&gt; auth_user</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="table-title">7. HeritageHubApp_event: Stores institutional event details</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 20%;">Constraints</th>
+      <th style="width: 45%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>BigInt(20)</td>
+      <td class="pk">Primary Key</td>
+      <td>Event ID</td>
+    </tr>
+    <tr>
+      <td><b>institution_id</b></td>
+      <td>BigInt(20)</td>
+      <td class="fk">Foreign Key</td>
+      <td>FK -&gt; HeritageHubApp_institution</td>
+    </tr>
+    <tr>
+      <td><b>name</b></td>
+      <td>Varchar(200)</td>
+      <td>Not Null</td>
+      <td>Festival / event name</td>
+    </tr>
+    <tr>
+      <td><b>description</b></td>
+      <td>Text</td>
+      <td>Nullable</td>
+      <td>Event description</td>
+    </tr>
+    <tr>
+      <td><b>date</b></td>
+      <td>Date</td>
+      <td>Not Null</td>
+      <td>Scheduled event date</td>
+    </tr>
+    <tr>
+      <td><b>location</b></td>
+      <td>Varchar(200)</td>
+      <td>Not Null</td>
+      <td>Event location on premises</td>
+    </tr>
+    <tr>
+      <td><b>estimated_cost</b></td>
+      <td>Decimal(12,2)</td>
+      <td>Not Null</td>
+      <td>Budget estimate in &#8377;</td>
+    </tr>
+    <tr>
+      <td><b>actual_cost</b></td>
+      <td>Decimal(12,2)</td>
+      <td>Not Null</td>
+      <td>Actual cost incurred in &#8377;</td>
+    </tr>
+    <tr>
+      <td><b>status</b></td>
+      <td>Varchar(20)</td>
+      <td>Not Null</td>
+      <td>Status (Scheduled / Ongoing / Completed / Cancelled)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="table-title">8. HeritageHubApp_maintenance: Schedules and tracks maintenance activities</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 20%;">Constraints</th>
+      <th style="width: 45%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>BigInt(20)</td>
+      <td class="pk">Primary Key</td>
+      <td>Maintenance ID</td>
+    </tr>
+    <tr>
+      <td><b>institution_id</b></td>
+      <td>BigInt(20)</td>
+      <td class="fk">Foreign Key</td>
+      <td>FK -&gt; HeritageHubApp_institution</td>
+    </tr>
+    <tr>
+      <td><b>asset_id</b></td>
+      <td>BigInt(20)</td>
+      <td class="fk">Foreign Key, Nullable</td>
+      <td>FK -&gt; HeritageHubApp_asset</td>
+    </tr>
+    <tr>
+      <td><b>title</b></td>
+      <td>Varchar(200)</td>
+      <td>Not Null</td>
+      <td>Maintenance work title</td>
+    </tr>
+    <tr>
+      <td><b>description</b></td>
+      <td>Text</td>
+      <td>Nullable</td>
+      <td>Work scope description</td>
+    </tr>
+    <tr>
+      <td><b>scheduled_date</b></td>
+      <td>Date</td>
+      <td>Not Null</td>
+      <td>Scheduled start date</td>
+    </tr>
+    <tr>
+      <td><b>completion_date</b></td>
+      <td>Date</td>
+      <td>Nullable</td>
+      <td>Actual completion date</td>
+    </tr>
+    <tr>
+      <td><b>estimated_cost</b></td>
+      <td>Decimal(12,2)</td>
+      <td>Not Null</td>
+      <td>Estimated cost in &#8377;</td>
+    </tr>
+    <tr>
+      <td><b>actual_cost</b></td>
+      <td>Decimal(12,2)</td>
+      <td>Not Null</td>
+      <td>Actual cost in &#8377;</td>
+    </tr>
+    <tr>
+      <td><b>status</b></td>
+      <td>Varchar(20)</td>
+      <td>Not Null</td>
+      <td>Status (Scheduled / In Progress / Completed / Cancelled)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="table-title">9. HeritageHubApp_auditlog: Records important system activities</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 20%;">Constraints</th>
+      <th style="width: 45%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>BigInt(20)</td>
+      <td class="pk">Primary Key</td>
+      <td>Audit Log ID</td>
+    </tr>
+    <tr>
+      <td><b>user_id</b></td>
+      <td>Int(11)</td>
+      <td class="fk">Foreign Key, Nullable</td>
+      <td>FK -&gt; auth_user</td>
+    </tr>
+    <tr>
+      <td><b>action</b></td>
+      <td>Varchar(200)</td>
+      <td>Not Null</td>
+      <td>Action performed</td>
+    </tr>
+    <tr>
+      <td><b>description</b></td>
+      <td>Text</td>
+      <td>Nullable</td>
+      <td>Action details / audit trail</td>
+    </tr>
+    <tr>
+      <td><b>timestamp</b></td>
+      <td>DateTime</td>
+      <td>Not Null</td>
+      <td>Date and time of action</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

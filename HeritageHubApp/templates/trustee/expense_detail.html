@@ -1,0 +1,310 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Expense #{{ expense.id }} - {{ expense.title }} - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .detail-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+        background: #fff;
+    }
+    .detail-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .spec-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f5f5f4;
+    }
+    .spec-item:last-child {
+        border-bottom: none;
+    }
+    .spec-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--hh-text-muted);
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    .spec-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--hh-text);
+    }
+    .approval-box {
+        background: #fffbeb;
+        border: 1.5px solid #fde68a;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">
+                <i class="bi bi-receipt text-warning me-2"></i>
+                Disbursement Record #{{ expense.id }}
+            </h3>
+            <p class="text-muted mb-0">Custodial record for <strong>{{ expense.institution.name }}</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'trustee_expense_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>All Expenses
+            </a>
+            <a href="{% url 'trustee_finance_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-cash-stack me-1"></i>Finance Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Approval Action Box (for Pending expenses) -->
+    {% if expense.status == 'Pending' %}
+        <div class="approval-box mb-4 shadow-sm">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1">
+                        <i class="bi bi-shield-exclamation text-warning me-2"></i>Major Expense Pending Trustee Authorization
+                    </h5>
+                    <p class="mb-0 text-muted small">
+                        As an authorized Trustee / Administrator, review the voucher specifications below.
+                        You have statutory authority to Approve or Reject this disbursement.
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <!-- Approve Form -->
+                    <form method="POST" action="{% url 'trustee_expense_approve' expense.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle me-1"></i>Approve Expense
+                        </button>
+                    </form>
+                    <!-- Reject Form -->
+                    <form method="POST" action="{% url 'trustee_expense_reject' expense.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-lg">
+                            <i class="bi bi-x-circle me-1"></i>Reject Expense
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% elif expense.status == 'Approved' %}
+        <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-check-circle-fill fs-3 me-3 flex-shrink-0"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">Expense Authorized & Approved</h6>
+                <p class="mb-0 small">
+                    This disbursement was reviewed and approved by
+                    <strong>{{ expense.approved_by.get_full_name|default:expense.approved_by.username }}</strong>.
+                    It is classified as an official institutional expenditure.
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-x-circle-fill fs-3 me-3 flex-shrink-0"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">Disbursement Rejected</h6>
+                <p class="mb-0 small">
+                    This expenditure was reviewed and marked as Rejected by the Trustee. It is not counted as utilized institutional funds.
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Expense Details Card -->
+    <div class="card detail-card mb-4">
+        <div class="detail-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h5 class="mb-0 text-white fw-bold">
+                    {{ expense.title }}
+                </h5>
+                <small class="text-light opacity-75">{{ expense.category }} &bull; Incurred {{ expense.expense_date|date:"d M Y" }}</small>
+            </div>
+            <div>
+                {% if expense.status == 'Approved' %}
+                    <span class="badge bg-success px-3 py-2 fs-6">
+                        <i class="bi bi-check-circle me-1"></i>Approved
+                    </span>
+                {% elif expense.status == 'Pending' %}
+                    <span class="badge bg-warning text-dark px-3 py-2 fs-6">
+                        <i class="bi bi-clock me-1"></i>Pending Review
+                    </span>
+                {% else %}
+                    <span class="badge bg-danger px-3 py-2 fs-6">
+                        <i class="bi bi-x-circle me-1"></i>Rejected
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body p-4 p-md-5">
+            <div class="row g-4">
+                <!-- Left: Core Specifications -->
+                <div class="col-lg-7">
+                    <div class="p-4 bg-light rounded-3 mb-4">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-card-checklist me-2 text-warning"></i>Voucher Specifications
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Voucher Title</div>
+                                <div class="spec-value fw-bold text-dark">{{ expense.title }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Disbursement Amount</div>
+                                <div class="spec-value text-danger fw-bold fs-5">₹{{ expense.amount|floatformat:2 }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Accounting Category</div>
+                                <div class="spec-value">{{ expense.category }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Date Incurred</div>
+                                <div class="spec-value">{{ expense.expense_date|date:"d M Y" }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Approval Status</div>
+                                <div class="spec-value">{{ expense.status }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Authorized By</div>
+                                <div class="spec-value">
+                                    {% if expense.approved_by %}
+                                        <i class="bi bi-person-check text-success me-1"></i>{{ expense.approved_by.get_full_name|default:expense.approved_by.username }}
+                                    {% else %}
+                                        <span class="text-muted fst-italic">Awaiting review</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-12 spec-item">
+                                <div class="spec-label">Custodial Institution</div>
+                                <div class="spec-value">{{ expense.institution.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="p-3 border rounded-3">
+                        <h6 class="fw-bold text-dark mb-2">
+                            <i class="bi bi-text-paragraph me-2 text-warning"></i>Voucher Description & Notes
+                        </h6>
+                        <div class="text-muted small lh-lg">
+                            {% if expense.description %}
+                                {{ expense.description|linebreaks }}
+                            {% else %}
+                                <span class="fst-italic">No additional vendor description or voucher notes recorded.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Donation Funding Linkage -->
+                <div class="col-lg-5">
+                    <div class="border rounded-3 p-4 bg-white shadow-sm">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-link-45deg me-2 text-warning"></i>Donation Funding Source
+                        </h6>
+                        {% if expense.donation %}
+                            <div class="mb-3">
+                                <div class="small text-muted">Linked Donor Contribution:</div>
+                                <div class="fw-bold fs-5 text-dark">{{ expense.donation.donor_name }}</div>
+                                <small class="text-muted">{{ expense.donation.donor_email|default:"No email recorded" }}</small>
+                            </div>
+                            <div class="mb-3">
+                                <div class="small text-muted">Donation Amount & Purpose:</div>
+                                <div class="fw-semibold text-success">₹{{ expense.donation.amount|floatformat:2 }}</div>
+                                <div class="small text-muted">{{ expense.donation.purpose }}</div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="small text-muted">Received Date:</div>
+                                <div class="small text-dark">{{ expense.donation.donation_date|date:"d M Y, h:i A" }}</div>
+                            </div>
+                            <a href="{% url 'trustee_donation_detail' expense.donation.id %}" class="btn btn-heritage-outline w-100">
+                                <i class="bi bi-box-arrow-up-right me-1"></i>View Full Donation Dossier
+                            </a>
+                        {% else %}
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-bank fs-1 d-block mb-2 text-secondary"></i>
+                                <h6 class="fw-bold text-dark">General Institutional Funds</h6>
+                                <p class="small mb-0">This expenditure is financed through general custodial treasury rather than a specifically earmarked donor contribution.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

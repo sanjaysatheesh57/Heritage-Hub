@@ -1,0 +1,312 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Event & Festival Management - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+    .stat-card .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: var(--hh-text-muted);
+        margin-top: 0.25rem;
+    }
+    .event-card {
+        border: 1px solid var(--hh-border);
+        border-radius: 12px;
+        background: #fff;
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+    .event-card:hover {
+        border-color: var(--hh-gold);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .date-badge {
+        width: 72px;
+        height: 72px;
+        background: linear-gradient(135deg, var(--hh-primary) 0%, var(--hh-primary-dark) 100%);
+        color: #fff;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        text-align: center;
+    }
+    .date-badge .day {
+        font-size: 1.6rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .date-badge .month {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header Area -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-calendar-event text-warning me-2"></i>Event & Festival Management
+            </h3>
+            <p class="text-muted mb-0">
+                Schedule and monitor religious rituals, annual festivals, and cultural events for <strong>{{ institution.name }}</strong>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'trustee_event_add' %}" class="btn btn-heritage-primary">
+                <i class="bi bi-plus-circle me-1"></i>Schedule New Event
+            </a>
+            <a href="{% url 'trustee_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_event_list' %}">
+                    <i class="bi bi-calendar-event me-1"></i>Events & Festivals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_maintenance_list' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Works
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Reports & Analytics
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Metrics Cards Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-dark">{{ count_all }}</div>
+                <div class="stat-label">Total Events</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-primary">{{ count_scheduled }}</div>
+                <div class="stat-label">Scheduled</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-warning">{{ count_ongoing }}</div>
+                <div class="stat-label">Ongoing</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-success">{{ count_completed }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-secondary">₹{{ total_estimated|floatformat:0 }}</div>
+                <div class="stat-label">Est. Budget</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-info">₹{{ total_actual|floatformat:0 }}</div>
+                <div class="stat-label">Actual Spent</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Pills / Tabs -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <ul class="nav nav-pills gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'all' %}active bg-dark{% else %}text-dark{% endif %}" href="{% url 'trustee_event_list' %}">
+                            All Events <span class="badge {% if current_filter == 'all' %}bg-secondary{% else %}bg-light text-dark{% endif %} ms-1">{{ count_all }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'Scheduled' %}active bg-primary{% else %}text-dark{% endif %}" href="{% url 'trustee_event_list' %}?status=Scheduled">
+                            Scheduled <span class="badge {% if current_filter == 'Scheduled' %}bg-light text-primary{% else %}bg-light text-dark{% endif %} ms-1">{{ count_scheduled }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'Ongoing' %}active bg-warning text-dark{% else %}text-dark{% endif %}" href="{% url 'trustee_event_list' %}?status=Ongoing">
+                            Ongoing <span class="badge {% if current_filter == 'Ongoing' %}bg-dark text-warning{% else %}bg-light text-dark{% endif %} ms-1">{{ count_ongoing }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'Completed' %}active bg-success{% else %}text-dark{% endif %}" href="{% url 'trustee_event_list' %}?status=Completed">
+                            Completed <span class="badge {% if current_filter == 'Completed' %}bg-light text-success{% else %}bg-light text-dark{% endif %} ms-1">{{ count_completed }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'Cancelled' %}active bg-danger{% else %}text-dark{% endif %}" href="{% url 'trustee_event_list' %}?status=Cancelled">
+                            Cancelled <span class="badge {% if current_filter == 'Cancelled' %}bg-light text-danger{% else %}bg-light text-dark{% endif %} ms-1">{{ count_cancelled }}</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <span class="text-muted small">
+                    Showing <strong>{{ events|length }}</strong> event{{ events|length|pluralize }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events List / Date-Based Calendar View -->
+    {% if events %}
+        <div class="row g-3">
+            {% for event in events %}
+            <div class="col-12">
+                <div class="event-card p-3 p-md-4">
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                        <!-- Date Badge & Info -->
+                        <div class="d-flex align-items-start gap-3 flex-grow-1">
+                            <div class="date-badge">
+                                <span class="day">{{ event.date|date:"d" }}</span>
+                                <span class="month">{{ event.date|date:"M Y" }}</span>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    <h5 class="fw-bold mb-0 text-dark">{{ event.name }}</h5>
+                                    {% if event.status == 'Scheduled' %}
+                                        <span class="badge bg-primary">Scheduled</span>
+                                    {% elif event.status == 'Ongoing' %}
+                                        <span class="badge bg-warning text-dark">Ongoing</span>
+                                    {% elif event.status == 'Completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% endif %}
+                                </div>
+                                <p class="text-muted small mb-2">
+                                    <i class="bi bi-geo-alt me-1 text-danger"></i>{{ event.location }}
+                                    {% if event.description %}
+                                        &bull; <span>{{ event.description|truncatewords:15 }}</span>
+                                    {% endif %}
+                                </p>
+                                <div class="d-flex gap-3 small text-muted">
+                                    <span>Estimated Cost: <strong class="text-dark">₹{{ event.estimated_cost|floatformat:2 }}</strong></span>
+                                    <span>Actual Cost: <strong class="text-dark">₹{{ event.actual_cost|floatformat:2 }}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-2 flex-shrink-0 align-self-end align-self-md-center">
+                            <a href="{% url 'trustee_event_detail' event.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye me-1"></i>View Details
+                            </a>
+                            <a href="{% url 'trustee_event_edit' event.id %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x fs-1 text-secondary d-block mb-3"></i>
+                <h5 class="fw-bold text-dark mb-1">No Events Found</h5>
+                <p class="small mb-3">
+                    {% if current_filter == 'all' %}
+                        No events have been scheduled for {{ institution.name }} yet.
+                    {% else %}
+                        No events found matching status filter "<strong>{{ current_filter }}</strong>".
+                    {% endif %}
+                </p>
+                <a href="{% url 'trustee_event_add' %}" class="btn btn-heritage-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Schedule First Event
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

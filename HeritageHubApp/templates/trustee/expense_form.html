@@ -1,0 +1,243 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Record Institutional Expense - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .form-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .form-card .card-header {
+        background: linear-gradient(135deg, var(--hh-primary) 0%, var(--hh-primary-dark) 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+    .inst-badge-banner {
+        background-color: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+        padding: 0.85rem 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">
+                <i class="bi bi-dash-circle text-warning me-2"></i>
+                Record Expenditure & Disbursement
+            </h3>
+            <p class="text-muted mb-0">Record institutional expenses for <strong>{{ institution.name }}</strong></p>
+        </div>
+        <a href="{% url 'trustee_expense_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Expenses
+        </a>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Institution Association Banner -->
+    <div class="inst-badge-banner d-flex align-items-center">
+        <i class="bi bi-bank2 fs-4 text-warning me-3"></i>
+        <div class="small">
+            <strong class="text-dark">Beneficiary Institution:</strong>
+            This expense will be permanently assigned to <strong>{{ institution.name }}</strong> ({{ institution.get_institution_type_display }}).
+            <span class="d-block text-muted mt-1">Newly submitted expenses are recorded with status <strong>Pending</strong> for major expense authorization.</span>
+        </div>
+    </div>
+
+    <!-- Validation Errors -->
+    {% if errors %}
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex align-items-center mb-1">
+                <i class="bi bi-exclamation-octagon-fill me-2 fs-5"></i>
+                <strong>Please fix the following issues:</strong>
+            </div>
+            <ul class="mb-0 small ps-3">
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    <!-- Expense Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card form-card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-white">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>New Expenditure Record
+                    </h5>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" action="{% url 'trustee_expense_add' %}" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <!-- Title -->
+                            <div class="col-md-12">
+                                <label for="title" class="form-label small fw-semibold text-dark">
+                                    Expense Title / Voucher Head <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="title" name="title"
+                                       placeholder="e.g., Annual Chariot Restoration / Sanctum Oil & Ghee Supplies / Festival Security"
+                                       value="{{ form_data.title|default:'' }}" required autofocus>
+                            </div>
+
+                            <!-- Category -->
+                            <div class="col-md-6">
+                                <label for="category" class="form-label small fw-semibold text-dark">
+                                    Accounting Category <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="category" name="category"
+                                       list="category_suggestions"
+                                       placeholder="e.g., Temple Rituals & Pooja, Renovation & Conservation"
+                                       value="{{ form_data.category|default:'' }}" required>
+                                <datalist id="category_suggestions">
+                                    <option value="Daily Pooja & Ritual Supplies">
+                                    <option value="Heritage Renovation & Conservation">
+                                    <option value="Temple Chariot & Vahana Maintenance">
+                                    <option value="Annadanam & Community Prasadam">
+                                    <option value="Priests & Traditional Staff Honorarium">
+                                    <option value="Electricity & Temple Utilities">
+                                    <option value="Security & Premises Maintenance">
+                                    <option value="Annual Festival & Utsavam Operations">
+                                    <option value="Epigraphy, Library & Documentation">
+                                </datalist>
+                            </div>
+
+                            <!-- Amount -->
+                            <div class="col-md-6">
+                                <label for="amount" class="form-label small fw-semibold text-dark">
+                                    Disbursement Amount (₹ INR) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">₹</span>
+                                    <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="amount"
+                                           placeholder="0.00"
+                                           value="{{ form_data.amount|default:'' }}" required>
+                                </div>
+                            </div>
+
+                            <!-- Expense Date -->
+                            <div class="col-md-6">
+                                <label for="expense_date" class="form-label small fw-semibold text-dark">
+                                    Date of Expense / Incurrence <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="expense_date" name="expense_date"
+                                       value="{{ form_data.expense_date|default:'' }}" required>
+                            </div>
+
+                            <!-- Donation Source Linkage -->
+                            <div class="col-md-6">
+                                <label for="donation_id" class="form-label small fw-semibold text-dark">
+                                    Earmarked Donation Source <span class="text-muted">(Optional)</span>
+                                </label>
+                                <select class="form-select" id="donation_id" name="donation_id">
+                                    <option value="">— None (General Institutional Funds) —</option>
+                                    {% for d in available_donations %}
+                                        <option value="{{ d.id }}" {% if form_data.donation_id == d.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ d.donor_name }} — ₹{{ d.amount|floatformat:0 }} ({{ d.purpose }}) [{{ d.donation_date|date:"d M Y" }}]
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text small">Link this disbursement to a specific successful donor contribution.</div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <label for="description" class="form-label small fw-semibold text-dark">
+                                    Voucher Description & Vendor Details <span class="text-muted">(Optional)</span>
+                                </label>
+                                <textarea class="form-control" id="description" name="description" rows="4"
+                                          placeholder="Specify contractor name, material specifications, statutory justification, or bill references...">{{ form_data.description|default:'' }}</textarea>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'trustee_expense_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-heritage-primary btn-lg">
+                                <i class="bi bi-check2-circle me-2"></i>Record & Submit for Approval
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

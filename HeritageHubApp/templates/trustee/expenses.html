@@ -1,0 +1,248 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Expense Records - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .expenses-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+        background: #fff;
+    }
+    .expenses-card .card-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .stat-card-sm {
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 1rem;
+        background: #fff;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">
+                <i class="bi bi-receipt text-warning me-2"></i>
+                Expenditure & Disbursement Registry
+            </h3>
+            <p class="text-muted mb-0">Custodial expense records and major payment authorizations for <strong>{{ institution.name }}</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'trustee_expense_add' %}" class="btn btn-heritage-primary">
+                <i class="bi bi-dash-circle me-1"></i>Record New Expense
+            </a>
+            <a href="{% url 'trustee_finance_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Finance Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Stat Pills Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4">
+            <div class="stat-card-sm">
+                <span class="text-muted small d-block text-uppercase">Approved Disbursements</span>
+                <span class="fs-4 fw-bold text-success">₹{{ approved_total|floatformat:2 }}</span>
+                <div class="small text-muted">{{ count_approved }} record{{ count_approved|pluralize }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="stat-card-sm {% if count_pending %}border-warning bg-warning-subtle{% endif %}">
+                <span class="text-muted small d-block text-uppercase">Pending Trustee Review</span>
+                <span class="fs-4 fw-bold {% if count_pending %}text-warning{% else %}text-muted{% endif %}">
+                    ₹{{ pending_total|floatformat:2 }}
+                </span>
+                <div class="small text-muted">
+                    {% if count_pending %}
+                        <span class="badge bg-warning text-dark">{{ count_pending }} major expense{{ count_pending|pluralize }} awaiting review</span>
+                    {% else %}
+                        0 records pending
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="stat-card-sm">
+                <span class="text-muted small d-block text-uppercase">Total Recorded</span>
+                <span class="fs-4 fw-bold text-dark">{{ count_all }}</span>
+                <div class="small text-muted">{{ count_rejected }} rejected</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expenses Table Card -->
+    <div class="card expenses-card">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h5 class="mb-0 text-white"><i class="bi bi-receipt-cutoff me-2"></i>Institutional Expenses</h5>
+            <div class="btn-group btn-group-sm" role="group">
+                <a href="{% url 'trustee_expense_list' %}" class="btn btn-outline-light {% if current_filter == 'all' %}active{% endif %}">
+                    All ({{ count_all }})
+                </a>
+                <a href="?status=Pending" class="btn btn-outline-warning {% if current_filter == 'Pending' %}active{% endif %}">
+                    Pending Review ({{ count_pending }})
+                </a>
+                <a href="?status=Approved" class="btn btn-outline-light {% if current_filter == 'Approved' %}active{% endif %}">
+                    Approved ({{ count_approved }})
+                </a>
+                <a href="?status=Rejected" class="btn btn-outline-danger {% if current_filter == 'Rejected' %}active{% endif %}">
+                    Rejected ({{ count_rejected }})
+                </a>
+            </div>
+        </div>
+
+        {% if expenses %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Expense Title & Category</th>
+                            <th>Amount</th>
+                            <th>Expense Date</th>
+                            <th>Donation Source</th>
+                            <th>Status</th>
+                            <th>Approved By</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in expenses %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ e.title }}</div>
+                                    <span class="badge bg-light text-dark border">{{ e.category }}</span>
+                                </td>
+                                <td class="fw-bold text-dark">₹{{ e.amount|floatformat:2 }}</td>
+                                <td class="small text-muted">{{ e.expense_date|date:"d M Y" }}</td>
+                                <td>
+                                    {% if e.donation %}
+                                        <a href="{% url 'trustee_donation_detail' e.donation.id %}" class="text-primary text-decoration-none small">
+                                            <i class="bi bi-link-45deg me-1"></i>{{ e.donation.donor_name }} (₹{{ e.donation.amount|floatformat:0 }})
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted small fst-italic">General Funds</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if e.status == 'Approved' %}
+                                        <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                                    {% elif e.status == 'Pending' %}
+                                        <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-clock me-1"></i>Pending Review</span>
+                                    {% else %}
+                                        <span class="badge bg-danger px-2 py-1"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    {% if e.approved_by %}
+                                        <i class="bi bi-person-check text-success me-1"></i>{{ e.approved_by.get_full_name|default:e.approved_by.username }}
+                                    {% else %}
+                                        <span class="fst-italic">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if e.status == 'Pending' %}
+                                        <a href="{% url 'trustee_expense_detail' e.id %}" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-shield-check me-1"></i>Review
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'trustee_expense_detail' e.id %}" class="btn btn-sm btn-outline-primary">
+                                            Details
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-receipt-cutoff fs-1 d-block mb-2 text-secondary"></i>
+                <h5 class="fw-bold text-dark">No Expense Records Found</h5>
+                <p class="small text-muted col-md-6 mx-auto mb-3">
+                    {% if current_filter != 'all' %}
+                        No expenses match the selected status filter.
+                    {% else %}
+                        No disbursements or expenses recorded yet for {{ institution.name }}.
+                    {% endif %}
+                </p>
+                <a href="{% url 'trustee_expense_add' %}" class="btn btn-heritage-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Record New Expense
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,295 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if is_edit %}Edit Asset: {{ asset.name }}{% else %}Add New Asset{% endif %} - HeritageHub
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .form-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .form-card .card-header {
+        background: linear-gradient(135deg, var(--hh-primary) 0%, var(--hh-primary-dark) 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+    .inst-badge-banner {
+        background-color: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+        padding: 0.85rem 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .current-photo-preview {
+        max-width: 140px;
+        max-height: 140px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e7e5e4;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">
+                <i class="bi bi-box-seam text-warning me-2"></i>
+                {% if is_edit %}Edit Heritage Asset{% else %}Catalog New Asset{% endif %}
+            </h3>
+            <p class="text-muted mb-0">Record and classify property belonging to {{ institution.name }}</p>
+        </div>
+        <a href="{% url 'trustee_asset_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Assets
+        </a>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Institution Association Banner (Automatic & Non-modifiable) -->
+    <div class="inst-badge-banner d-flex align-items-center">
+        <i class="bi bi-bank2 fs-4 text-warning me-3"></i>
+        <div class="small">
+            <strong class="text-dark">Registered Institution:</strong>
+            This asset will be permanently linked to <strong>{{ institution.name }}</strong> ({{ institution.get_institution_type_display }}).
+        </div>
+    </div>
+
+    <!-- Validation Errors -->
+    {% if errors %}
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex align-items-center mb-1">
+                <i class="bi bi-exclamation-octagon-fill me-2 fs-5"></i>
+                <strong>Please fix the following:</strong>
+            </div>
+            <ul class="mb-0 small ps-3">
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    <!-- Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card form-card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-white">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        {% if is_edit %}Modify Asset Details{% else %}New Asset Details{% endif %}
+                    </h5>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <!-- Asset Name -->
+                            <div class="col-md-8">
+                                <label for="name" class="form-label small fw-semibold text-dark">
+                                    Asset Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                       placeholder="e.g., Panchaloha Nataraja Idol / Golden Kireedam / Kalyana Mandapam"
+                                       value="{% if form_data.name %}{{ form_data.name }}{% elif asset %}{{ asset.name }}{% endif %}" required autofocus>
+                            </div>
+
+                            <!-- Asset Type -->
+                            <div class="col-md-4">
+                                <label for="asset_type" class="form-label small fw-semibold text-dark">
+                                    Asset Classification <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="asset_type" name="asset_type" required>
+                                    <option value="">— Select Classification —</option>
+                                    <option value="Movable" {% if form_data.asset_type == 'Movable' or asset.asset_type == 'Movable' %}selected{% endif %}>
+                                        Movable (Idols, Jewels, Vahanas, Manuscripts)
+                                    </option>
+                                    <option value="Immovable" {% if form_data.asset_type == 'Immovable' or asset.asset_type == 'Immovable' %}selected{% endif %}>
+                                        Immovable (Mandapams, Gopurams, Tanks, Lands)
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Category -->
+                            <div class="col-md-6">
+                                <label for="category" class="form-label small fw-semibold text-dark">
+                                    Category <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="category" name="category"
+                                       list="category_suggestions"
+                                       placeholder="e.g., Deity Idol, Sacred Jewelry, Temple Vehicle, Architecture"
+                                       value="{% if form_data.category %}{{ form_data.category }}{% elif asset %}{{ asset.category }}{% endif %}" required>
+                                <datalist id="category_suggestions">
+                                    <option value="Deity Idol / Sculpture">
+                                    <option value="Sacred Jewelry & Regalia">
+                                    <option value="Temple Vahana / Chariot">
+                                    <option value="Copper Plates & Manuscripts">
+                                    <option value="Sanctum / Vimana">
+                                    <option value="Mandapam / Pillar Hall">
+                                    <option value="Temple Tank / Pushkarini">
+                                    <option value="Gopuram / Gateway Tower">
+                                    <option value="Agricultural Land / Grove">
+                                    <option value="Ritual Utensils / Bells">
+                                </datalist>
+                            </div>
+
+                            <!-- Current Valuation -->
+                            <div class="col-md-6">
+                                <label for="current_valuation" class="form-label small fw-semibold text-dark">
+                                    Current Valuation (₹ INR) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">₹</span>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="current_valuation" name="current_valuation"
+                                           placeholder="0.00"
+                                           value="{% if form_data.current_valuation %}{{ form_data.current_valuation }}{% elif asset %}{{ asset.current_valuation }}{% endif %}" required>
+                                </div>
+                            </div>
+
+                            <!-- Physical Condition -->
+                            <div class="col-md-6">
+                                <label for="condition" class="form-label small fw-semibold text-dark">
+                                    Physical Condition <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="condition" name="condition" required>
+                                    <option value="">— Select Condition —</option>
+                                    <option value="Excellent" {% if form_data.condition == 'Excellent' or asset.condition == 'Excellent' %}selected{% endif %}>
+                                        Excellent — Pristine / Fully Restored
+                                    </option>
+                                    <option value="Good" {% if form_data.condition == 'Good' or asset.condition == 'Good' %}selected{% endif %}>
+                                        Good — Sound / Minor Wear
+                                    </option>
+                                    <option value="Needs Maintenance" {% if form_data.condition == 'Needs Maintenance' or asset.condition == 'Needs Maintenance' %}selected{% endif %}>
+                                        Needs Maintenance — Conservation Required
+                                    </option>
+                                    <option value="Damaged" {% if form_data.condition == 'Damaged' or asset.condition == 'Damaged' %}selected{% endif %}>
+                                        Damaged — Urgent Restoration Needed
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="col-md-6">
+                                <label for="location" class="form-label small fw-semibold text-dark">
+                                    Location on Premises <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="location" name="location"
+                                       placeholder="e.g., Sanctum Sanctorum, Strongroom, Northern Praharam"
+                                       value="{% if form_data.location %}{{ form_data.location }}{% elif asset %}{{ asset.location }}{% endif %}" required>
+                            </div>
+
+                            <!-- Date Acquired -->
+                            <div class="col-md-6">
+                                <label for="date_acquired" class="form-label small fw-semibold text-dark">
+                                    Date Acquired / Consecrated <span class="text-muted">(Optional)</span>
+                                </label>
+                                <input type="date" class="form-control" id="date_acquired" name="date_acquired"
+                                       value="{% if form_data.date_acquired %}{{ form_data.date_acquired }}{% elif asset.date_acquired %}{{ asset.date_acquired|date:'Y-m-d' }}{% endif %}">
+                                <div class="form-text small">Leave blank if historical/ancient acquisition date is unknown.</div>
+                            </div>
+
+                            <!-- Photograph Upload -->
+                            <div class="col-md-6">
+                                <label for="photograph" class="form-label small fw-semibold text-dark">
+                                    Photograph <span class="text-muted">(Optional, Image file)</span>
+                                </label>
+                                <input type="file" class="form-control" id="photograph" name="photograph" accept="image/*">
+                                {% if is_edit and asset.photograph %}
+                                    <div class="mt-2 d-flex align-items-center gap-2">
+                                        <img src="{{ asset.photograph.url }}" alt="Current photo" class="current-photo-preview">
+                                        <div class="small text-muted">
+                                            Current image saved.<br>
+                                            Upload a new file above to replace it.
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <label for="description" class="form-label small fw-semibold text-dark">
+                                    Historical Description & Inscriptions <span class="text-muted">(Optional)</span>
+                                </label>
+                                <textarea class="form-control" id="description" name="description" rows="4"
+                                          placeholder="Historical significance, metal composition, donor inscriptions, or architectural details...">{% if form_data.description %}{{ form_data.description }}{% elif asset %}{{ asset.description }}{% endif %}</textarea>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if is_edit and asset %}
+                                <a href="{% url 'trustee_asset_detail' asset.id %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Cancel
+                                </a>
+                            {% else %}
+                                <a href="{% url 'trustee_asset_list' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Cancel
+                                </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-heritage-primary btn-lg">
+                                <i class="bi bi-check2-circle me-2"></i>
+                                {% if is_edit %}Save Changes{% else %}Record Asset{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

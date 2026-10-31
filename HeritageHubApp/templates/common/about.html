@@ -1,0 +1,182 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title %}About HeritageHub - Project Overview & Academic Synopsis{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="py-4 border-bottom" style="background-color: #f5f5f4;">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none" style="color: var(--hh-primary);">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">About System</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-1" style="color: var(--hh-dark);">About HeritageHub</h2>
+        <p class="text-muted mb-0">Cultural Heritage Asset and Trust Management Information System</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <div class="col-lg-8">
+            <!-- Project Purpose -->
+            <section class="mb-5">
+                <h3 class="fw-bold mb-3 pb-2 border-bottom" style="color: var(--hh-primary-dark);">
+                    <i class="bi bi-bullseye me-2 text-warning"></i>Project Purpose
+                </h3>
+                <p class="lead" style="color: #44403c; line-height: 1.7;">
+                    <strong>HeritageHub</strong> is a web-based Management Information System (MIS) engineered specifically for major temples, religious trusts, and cultural heritage institutions. 
+                </p>
+                <p style="line-height: 1.7; color: #57534e;">
+                    India's temples and cultural monuments preserve invaluable sacred artifacts, ancient architecture, and community trust. However, institutional stewardship requires robust governance mechanisms to track movable and immovable assets, account for sacred offerings, execute timely restoration, and foster complete transparency. HeritageHub solves these challenges through a centralized, role-governed digital architecture.
+                </p>
+            </section>
+
+            <!-- The Problem with Manual Management -->
+            <section class="mb-5">
+                <h3 class="fw-bold mb-3 pb-2 border-bottom" style="color: var(--hh-primary-dark);">
+                    <i class="bi bi-exclamation-triangle me-2 text-danger"></i>The Challenge: Manual Management Vulnerabilities
+                </h3>
+                <p style="line-height: 1.7; color: #57534e;">
+                    Traditional heritage trusts often rely on paper registers, unverified physical cash boxes, and decentralized maintenance notes. This introduces significant risks:
+                </p>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3 h-100 bg-white border">
+                            <h6 class="fw-bold text-danger"><i class="bi bi-x-circle me-1"></i> Asset Misplacement & Valuation Void</h6>
+                            <p class="small text-muted mb-0">Antiques, gold jewelry, and movable relics lack standardized valuation and condition logs, increasing the risk of loss or deterioration.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3 h-100 bg-white border">
+                            <h6 class="fw-bold text-danger"><i class="bi bi-x-circle me-1"></i> Cash Accounting Gaps</h6>
+                            <p class="small text-muted mb-0">Manual receipts lead to reconciliation delays, donor mistrust, and difficulty in auditing total collections vs expenditures.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3 h-100 bg-white border">
+                            <h6 class="fw-bold text-danger"><i class="bi bi-x-circle me-1"></i> Untracked Maintenance</h6>
+                            <p class="small text-muted mb-0">Irregular or ad-hoc maintenance leads to escalating repair expenses and irreversible structural decay of heritage sites.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3 h-100 bg-white border">
+                            <h6 class="fw-bold text-danger"><i class="bi bi-x-circle me-1"></i> Absence of Public Transparency</h6>
+                            <p class="small text-muted mb-0">Devotees have no verifiable insight into how their donations are deployed toward temple welfare or sacred rituals.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Four Core Modules -->
+            <section class="mb-5">
+                <h3 class="fw-bold mb-3 pb-2 border-bottom" style="color: var(--hh-primary-dark);">
+                    <i class="bi bi-grid-3x3-gap me-2 text-primary"></i>The Four Core Modules
+                </h3>
+                <div class="d-flex flex-column gap-3">
+                    <div class="p-4 bg-white rounded-3 border">
+                        <h5 class="fw-bold" style="color: var(--hh-dark);"><i class="bi bi-gem text-warning me-2"></i>1. Asset Management Module</h5>
+                        <p class="text-muted small mb-2">
+                            Comprehensive ledger for both movable (jewels, ceremonial crowns, silver chariots, sacred idols) and immovable assets (temple complexes, land parcels, mandapams).
+                        </p>
+                        <ul class="small text-muted mb-0">
+                            <li>Visual photographic evidence and documentation uploads.</li>
+                            <li>Current market and historical valuation tracking.</li>
+                            <li>Condition grading: Excellent, Good, Needs Maintenance, Damaged.</li>
+                            <li>Precise geolocation and physical location recording.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 bg-white rounded-3 border">
+                        <h5 class="fw-bold" style="color: var(--hh-dark);"><i class="bi bi-cash-coin text-success me-2"></i>2. Donation and Finance Management Module</h5>
+                        <p class="text-muted small mb-2">
+                            A dual-stream financial ledger accommodating both digital online offerings and counter cash offerings recorded by staff.
+                        </p>
+                        <ul class="small text-muted mb-0">
+                            <li>Demonstration online payment workflow generating instant digital receipts.</li>
+                            <li>Mandatory unique receipt numbers and donor verification.</li>
+                            <li>Expense tracking with direct linkage to specific donation purposes where applicable.</li>
+                            <li>Full financial audit trail recorded in immutable audit logs.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 bg-white rounded-3 border">
+                        <h5 class="fw-bold" style="color: var(--hh-dark);"><i class="bi bi-calendar-event text-danger me-2"></i>3. Event and Maintenance Management Module</h5>
+                        <p class="text-muted small mb-2">
+                            Synchronized scheduling for recurring religious festivals, poojas, and conservation work.
+                        </p>
+                        <ul class="small text-muted mb-0">
+                            <li>Budget variance analysis: estimated budget vs actual expenditure.</li>
+                            <li>Lifecycle tracking: Scheduled &rarr; Ongoing / In Progress &rarr; Completed / Cancelled.</li>
+                            <li>Direct asset linkage for preventive maintenance history.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 bg-white rounded-3 border">
+                        <h5 class="fw-bold" style="color: var(--hh-dark);"><i class="bi bi-graph-up text-info me-2"></i>4. Reporting and Dashboard Module</h5>
+                        <p class="text-muted small mb-2">
+                            Actionable intelligence tools presenting quantitative summaries and verifiable disclosures.
+                        </p>
+                        <ul class="small text-muted mb-0">
+                            <li>Fund utilization dashboards demonstrating total collections vs approved expenditures.</li>
+                            <li>Asset distribution, valuation, and condition health statistics.</li>
+                            <li>Public transparency disclosures for community trust and devotee confidence.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transparency & Accountability -->
+            <section class="mb-5">
+                <h3 class="fw-bold mb-3 pb-2 border-bottom" style="color: var(--hh-primary-dark);">
+                    <i class="bi bi-shield-check me-2 text-success"></i>Transparency & Accountability
+                </h3>
+                <p style="line-height: 1.7; color: #57534e;">
+                    To uphold the sanctity of religious trusts, HeritageHub incorporates a built-in <code>AuditLog</code> facility. Every critical action—ranging from financial contributions to asset updates and expense disbursements—records timestamped entries tied to user credentials. This ensures complete institutional accountability for both community devotees and statutory authorities.
+                </p>
+            </section>
+        </div>
+
+        <!-- Sidebar Summary -->
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 85px;">
+                <div class="card hh-card border-0 shadow-sm p-3 mb-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3 text-dark">System Snapshot</h5>
+                        <ul class="list-unstyled small text-muted mb-3" style="line-height: 2;">
+                            <li><strong>System:</strong> HeritageHub</li>
+                            <li><strong>Type:</strong> Web-Based MIS</li>
+                            <li><strong>Target:</strong> Temples, Trusts, Heritage</li>
+                            <li><strong>Architecture:</strong> Django 5.0 (Python 3.12)</li>
+                            <li><strong>Database:</strong> Relational Database (SQLite)</li>
+                            <li><strong>Security:</strong> Role-Based Access Control</li>
+                        </ul>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'login' %}" class="btn btn-heritage-gold btn-sm">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Login to System
+                            </a>
+                            <a href="{% url 'contact' %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-envelope me-1"></i>Contact Team
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card hh-card border-0 shadow-sm p-3">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3 text-dark">Institutional Onboarding</h5>
+                        <p class="small text-muted" style="line-height: 1.6;">
+                            New temples or trusts submit institutional registration details, along with legal PAN and registration certificates.
+                        </p>
+                        <p class="small text-muted mb-0">
+                            Administrators review and verify the statutory documentation before approving the institution for active platform participation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

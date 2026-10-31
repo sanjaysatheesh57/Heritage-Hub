@@ -1,0 +1,185 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Payment - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .simulated-banner {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #f59e0b;
+        border-radius: 8px;
+        padding: 0.75rem 1.25rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    .simulated-banner i {
+        color: #d97706;
+    }
+    .order-summary-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .order-summary-card .card-header {
+        background: var(--hh-dark);
+        color: #fff;
+        padding: 1rem 1.25rem;
+        border: none;
+    }
+    .payment-method-card {
+        border: 2px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #fff;
+    }
+    .payment-method-card:hover {
+        border-color: var(--hh-gold);
+        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+    }
+    .payment-method-card.selected {
+        border-color: var(--hh-primary);
+        background-color: #fef7f0;
+        box-shadow: 0 4px 12px rgba(154, 52, 18, 0.15);
+    }
+    .payment-method-card input[type="radio"] {
+        accent-color: var(--hh-primary);
+    }
+    .payment-method-card .method-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="payment-wrapper">
+
+        <!-- Simulated Payment Banner -->
+        <div class="simulated-banner">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <strong>SIMULATED PAYMENT</strong> — This is a demonstration payment interface. No real money will be charged.
+        </div>
+
+        <div class="row g-4">
+            <!-- Order Summary -->
+            <div class="col-md-5">
+                <div class="card order-summary-card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-receipt me-2"></i>Order Summary</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <dl class="row mb-0">
+                            <dt class="col-5 text-muted small">Institution</dt>
+                            <dd class="col-7 fw-semibold small">{{ donation_data.institution_name }}</dd>
+
+                            <dt class="col-5 text-muted small">Donor</dt>
+                            <dd class="col-7 small">{{ donation_data.donor_name }}</dd>
+
+                            <dt class="col-5 text-muted small">Email</dt>
+                            <dd class="col-7 small">{{ donation_data.donor_email|default:"—" }}</dd>
+
+                            <dt class="col-5 text-muted small">Purpose</dt>
+                            <dd class="col-7 small">{{ donation_data.purpose }}</dd>
+                        </dl>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted fw-semibold">Total Amount</span>
+                            <span class="fs-4 fw-bold" style="color: var(--hh-primary);">₹{{ donation_data.amount }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-wallet2 me-2 text-warning"></i>Select Payment Method</h5>
+
+                        <form method="POST" action="{% url 'devotee_payment' %}" id="paymentForm">
+                            {% csrf_token %}
+
+                            <div class="d-flex flex-column gap-3 mb-4">
+                                <!-- Mock UPI -->
+                                <label class="payment-method-card d-flex align-items-center gap-3" id="card-upi">
+                                    <input type="radio" name="payment_method" value="Mock UPI" checked
+                                           onchange="selectMethod('card-upi')">
+                                    <div class="method-icon" style="background-color: #dcfce7; color: #15803d;">
+                                        <i class="bi bi-phone"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Mock UPI</div>
+                                        <small class="text-muted">Simulated UPI payment</small>
+                                    </div>
+                                </label>
+
+                                <!-- Mock Card -->
+                                <label class="payment-method-card d-flex align-items-center gap-3" id="card-card">
+                                    <input type="radio" name="payment_method" value="Mock Card"
+                                           onchange="selectMethod('card-card')">
+                                    <div class="method-icon" style="background-color: #e0e7ff; color: #4338ca;">
+                                        <i class="bi bi-credit-card"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Mock Card</div>
+                                        <small class="text-muted">Simulated credit/debit card</small>
+                                    </div>
+                                </label>
+
+                                <!-- Mock NetBanking -->
+                                <label class="payment-method-card d-flex align-items-center gap-3" id="card-netbanking">
+                                    <input type="radio" name="payment_method" value="Mock NetBanking"
+                                           onchange="selectMethod('card-netbanking')">
+                                    <div class="method-icon" style="background-color: #fef3c7; color: #b45309;">
+                                        <i class="bi bi-bank"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Mock NetBanking</div>
+                                        <small class="text-muted">Simulated net banking</small>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{% url 'devotee_donate' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-1"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-heritage-primary btn-lg">
+                                    <i class="bi bi-shield-check me-1"></i>Confirm Payment — ₹{{ donation_data.amount }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Highlight the selected payment method card
+    function selectMethod(cardId) {
+        document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById(cardId).classList.add('selected');
+    }
+    // Initialize first selection
+    selectMethod('card-upi');
+</script>
+{% endblock %}

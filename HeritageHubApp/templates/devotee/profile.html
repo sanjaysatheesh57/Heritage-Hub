@@ -1,0 +1,183 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}My Profile - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .devotee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .devotee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .devotee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .devotee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .profile-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .profile-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 4px solid var(--hh-gold);
+    }
+    .profile-avatar {
+        font-size: 4rem;
+        color: var(--hh-gold);
+        margin-bottom: 0.5rem;
+    }
+    .profile-body {
+        padding: 2rem;
+    }
+    .profile-field {
+        padding: 0.85rem 0;
+        border-bottom: 1px solid #f5f5f4;
+    }
+    .profile-field:last-child {
+        border-bottom: none;
+    }
+    .profile-field .field-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--hh-text-muted);
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+    }
+    .profile-field .field-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--hh-text);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Sub-Navigation -->
+    <nav class="devotee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'devotee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'devotee_donate' %}">
+                    <i class="bi bi-heart me-1"></i>Donate
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'devotee_donation_history' %}">
+                    <i class="bi bi-clock-history me-1"></i>Donation History
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'devotee_profile' %}">
+                    <i class="bi bi-person me-1"></i>Profile
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="profile-card">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <i class="bi bi-person-circle profile-avatar d-block"></i>
+                    <h4 class="fw-bold mb-1">{{ profile.user.get_full_name|default:profile.user.username }}</h4>
+                    <span class="badge badge-role-devotee px-3 py-1">{{ profile.role }}</span>
+                </div>
+
+                <!-- Profile Body -->
+                <div class="profile-body">
+                    <div class="profile-field">
+                        <div class="field-label"><i class="bi bi-person me-1"></i>Username</div>
+                        <div class="field-value">{{ profile.user.username }}</div>
+                    </div>
+
+                    <div class="profile-field">
+                        <div class="field-label"><i class="bi bi-card-text me-1"></i>Full Name</div>
+                        <div class="field-value">
+                            {% if profile.user.first_name or profile.user.last_name %}
+                                {{ profile.user.first_name }} {{ profile.user.last_name }}
+                            {% else %}
+                                <span class="text-muted fst-italic">Not provided</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="profile-field">
+                        <div class="field-label"><i class="bi bi-envelope me-1"></i>Email</div>
+                        <div class="field-value">
+                            {% if profile.user.email %}
+                                {{ profile.user.email }}
+                            {% else %}
+                                <span class="text-muted fst-italic">Not provided</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="profile-field">
+                        <div class="field-label"><i class="bi bi-telephone me-1"></i>Phone</div>
+                        <div class="field-value">
+                            {% if profile.phone %}
+                                {{ profile.phone }}
+                            {% else %}
+                                <span class="text-muted fst-italic">Not provided</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="profile-field">
+                        <div class="field-label"><i class="bi bi-shield-check me-1"></i>Role</div>
+                        <div class="field-value">
+                            <span class="badge badge-role-devotee px-2 py-1">{{ profile.role }}</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-field">
+                        <div class="field-label"><i class="bi bi-building me-1"></i>Institution</div>
+                        <div class="field-value">
+                            {% if profile.institution %}
+                                {{ profile.institution.name }}
+                            {% else %}
+                                <span class="text-muted fst-italic">Not associated</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a href="{% url 'devotee_dashboard' %}" class="btn btn-heritage-outline">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

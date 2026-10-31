@@ -1,0 +1,33 @@
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual Environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Database & SQLite files (MySQL is the primary database)
+*.sqlite3
+*.db
+
+# OS / Editor Artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build & Dist
+.dist/
+dist/
+build/
+*.egg-info/
+
+# Development / Scratch test scripts
+scratch/

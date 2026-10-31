@@ -1,0 +1,94 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Maintenance Dossier: {{ maintenance.title }} - HeritageHub Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'admin_maintenance_list' %}">Conservation & Maintenance</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ maintenance.title }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header Card -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h3 class="fw-bold text-dark mb-0">{{ maintenance.title }}</h3>
+                        <span class="badge {% if maintenance.status == 'Completed' %}bg-success{% elif maintenance.status == 'In Progress' %}bg-primary{% elif maintenance.status == 'Scheduled' %}bg-warning text-dark{% else %}bg-secondary{% endif %} px-2 py-1">
+                            {{ maintenance.status }}
+                        </span>
+                    </div>
+                    <div class="text-muted small">
+                        Institution: <strong class="text-dark">{{ maintenance.institution.name }}</strong>
+                        {% if maintenance.asset %}
+                            | Linked Asset: <strong>{{ maintenance.asset.name }}</strong>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <a href="{% url 'admin_maintenance_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Maintenance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Specifications -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-file-earmark-ruled text-primary me-2"></i>Project Specifications</h6>
+        </div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3 text-muted small">Work Title:</dt>
+                <dd class="col-sm-9 fw-semibold text-dark">{{ maintenance.title }}</dd>
+
+                <dt class="col-sm-3 text-muted small">Institution:</dt>
+                <dd class="col-sm-9">{{ maintenance.institution.name }}</dd>
+
+                <dt class="col-sm-3 text-muted small">Target Cultural Asset:</dt>
+                <dd class="col-sm-9">
+                    {% if maintenance.asset %}
+                        <a href="{% url 'admin_asset_detail' maintenance.asset.id %}" class="fw-semibold text-decoration-none">
+                            {{ maintenance.asset.name }} ({{ maintenance.asset.category }})
+                        </a>
+                    {% else %}
+                        <span class="text-muted">General Facility Maintenance</span>
+                    {% endif %}
+                </dd>
+
+                <dt class="col-sm-3 text-muted small">Scheduled Date:</dt>
+                <dd class="col-sm-9">{{ maintenance.scheduled_date|date:"d M Y" }}</dd>
+
+                <dt class="col-sm-3 text-muted small">Completion Date:</dt>
+                <dd class="col-sm-9">{{ maintenance.completion_date|date:"d M Y"|default:"Pending completion" }}</dd>
+
+                <dt class="col-sm-3 text-muted small">Estimated Cost:</dt>
+                <dd class="col-sm-9">₹{{ maintenance.estimated_cost|floatformat:2 }}</dd>
+
+                <dt class="col-sm-3 text-muted small">Actual Incurred Cost:</dt>
+                <dd class="col-sm-9 fw-bold text-dark fs-5">₹{{ maintenance.actual_cost|floatformat:2 }}</dd>
+
+                <dt class="col-sm-3 text-muted small">Performed By / Vendor:</dt>
+                <dd class="col-sm-9">{{ maintenance.performed_by|default:"Not specified" }}</dd>
+
+                <dt class="col-sm-3 text-muted small">Scope & Description:</dt>
+                <dd class="col-sm-9">{{ maintenance.description|default:"No description recorded." }}</dd>
+
+                <dt class="col-sm-3 text-muted small">Technical Notes:</dt>
+                <dd class="col-sm-9">{{ maintenance.notes|default:"No technical notes recorded." }}</dd>
+            </dl>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

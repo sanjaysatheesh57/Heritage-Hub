@@ -1,0 +1,362 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title %}Join HeritageHub — Unified Registration{% endblock %}
+
+{% block extra_css %}
+<style>
+    .role-card-label {
+        display: block;
+        cursor: pointer;
+        height: 100%;
+    }
+    .role-card {
+        border: 2px solid #e7e5e4;
+        border-radius: 10px;
+        padding: 16px;
+        transition: all 0.2s ease-in-out;
+        background-color: #ffffff;
+        height: 100%;
+    }
+    .role-card:hover {
+        border-color: var(--hh-gold);
+        background-color: #fffdfa;
+        transform: translateY(-2px);
+    }
+    .role-input:checked + .role-card {
+        border-color: var(--hh-primary);
+        background-color: #fff7ed;
+        box-shadow: 0 4px 12px rgba(154, 52, 18, 0.12);
+    }
+    .role-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+    }
+    .role-icon-devotee {
+        background-color: #fef3c7;
+        color: #b45309;
+    }
+    .role-icon-trustee {
+        background-color: #e0f2fe;
+        color: #0369a1;
+    }
+    .role-icon-staff {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-md-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <!-- Registration Card -->
+            <div class="card hh-card border-0 shadow-lg p-3">
+                <div class="card-body p-4 p-sm-5">
+                    <div class="text-center mb-4">
+                        <div class="module-icon-wrap icon-donation mx-auto mb-3" style="width: 64px; height: 64px; font-size: 2rem;">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">Join HeritageHub</h3>
+                        <p class="text-muted small">Select your role to register with the Cultural Heritage MIS portal</p>
+                        <hr class="my-3" style="border-color: #f0eee9;">
+                    </div>
+
+                    <!-- Error Alert from Form Validation -->
+                    {% if errors %}
+                        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-exclamation-octagon-fill me-2 fs-5"></i>
+                                <strong>Please fix the following issues:</strong>
+                            </div>
+                            <ul class="mb-0 small ps-3">
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+
+                    <!-- Registration Form -->
+                    <form method="POST" action="{% url 'register' %}" novalidate id="registrationForm">
+                        {% csrf_token %}
+
+                        <!-- Step 1: Role Selection -->
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-uppercase text-muted mb-2">
+                                1. Select Your Account Type <span class="text-danger">*</span>
+                            </label>
+                            <div class="row g-3">
+                                <!-- Devotee -->
+                                <div class="col-md-4">
+                                    <label class="role-card-label" for="role_devotee">
+                                        <input type="radio" class="d-none role-input" name="role" id="role_devotee" value="Devotee"
+                                               {% if not form_data.role or form_data.role == "Devotee" %}checked{% endif %}>
+                                        <div class="role-card text-center">
+                                            <div class="role-icon role-icon-devotee mx-auto">
+                                                <i class="bi bi-heart-fill"></i>
+                                            </div>
+                                            <div class="fw-bold text-dark mb-1">Devotee</div>
+                                            <span class="badge badge-role-devotee mb-2">Instant Access</span>
+                                            <p class="text-muted small mb-0" style="font-size: 0.78rem;">
+                                                Community donor & member. Contributes to institutions.
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <!-- Trustee -->
+                                <div class="col-md-4">
+                                    <label class="role-card-label" for="role_trustee">
+                                        <input type="radio" class="d-none role-input" name="role" id="role_trustee" value="Trustee"
+                                               {% if form_data.role == "Trustee" %}checked{% endif %}>
+                                        <div class="role-card text-center">
+                                            <div class="role-icon role-icon-trustee mx-auto">
+                                                <i class="bi bi-bank2"></i>
+                                            </div>
+                                            <div class="fw-bold text-dark mb-1">Trustee</div>
+                                            <span class="badge badge-role-trustee mb-2">Admin Approval</span>
+                                            <p class="text-muted small mb-0" style="font-size: 0.78rem;">
+                                                Institution governance & registration. Requires review.
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <!-- Staff -->
+                                <div class="col-md-4">
+                                    <label class="role-card-label" for="role_staff">
+                                        <input type="radio" class="d-none role-input" name="role" id="role_staff" value="Staff"
+                                               {% if form_data.role == "Staff" %}checked{% endif %}>
+                                        <div class="role-card text-center">
+                                            <div class="role-icon role-icon-staff mx-auto">
+                                                <i class="bi bi-person-badge"></i>
+                                            </div>
+                                            <div class="fw-bold text-dark mb-1">Staff</div>
+                                            <span class="badge badge-role-staff mb-2">Admin Approval</span>
+                                            <p class="text-muted small mb-0" style="font-size: 0.78rem;">
+                                                Operational personnel at an approved institution.
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Conditional: Staff Institution Selection -->
+                        <div id="institution-select-container" class="mb-4 p-3 border rounded bg-light"
+                             style="{% if form_data.role != 'Staff' %}display: none;{% endif %}">
+                            <label for="institution" class="form-label small fw-bold text-dark mb-1">
+                                Affiliated Approved Institution <span class="text-danger">*</span>
+                            </label>
+                            <p class="text-muted small mb-2">
+                                Staff members must be affiliated with an approved heritage institution.
+                            </p>
+                            {% if approved_institutions %}
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white text-muted"><i class="bi bi-building"></i></span>
+                                    <select class="form-select" id="institution" name="institution">
+                                        <option value="">-- Choose an Approved Institution --</option>
+                                        {% for inst in approved_institutions %}
+                                            <option value="{{ inst.id }}"
+                                                {% if form_data.institution_id|stringformat:"s" == inst.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ inst.name }} ({{ inst.get_institution_type_display }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning mb-0 py-2 small">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    No approved institutions are currently active. Staff registration requires an approved institution.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-uppercase text-muted mb-2">
+                                2. Account Credentials & Details
+                            </label>
+                        </div>
+
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label small fw-semibold text-dark">
+                                Username <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control border-start-0 ps-0" id="username" name="username"
+                                       placeholder="Choose a unique username"
+                                       value="{{ form_data.username|default:'' }}" required autofocus>
+                            </div>
+                            <div class="form-text small">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</div>
+                        </div>
+
+                        <!-- Name Row -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label for="first_name" class="form-label small fw-semibold text-dark">First Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-card-heading"></i></span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="first_name" name="first_name"
+                                           placeholder="First name"
+                                           value="{{ form_data.first_name|default:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="last_name" class="form-label small fw-semibold text-dark">Last Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-card-heading"></i></span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="last_name" name="last_name"
+                                           placeholder="Last name"
+                                           value="{{ form_data.last_name|default:'' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Row -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label for="email" class="form-label small fw-semibold text-dark">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control border-start-0 ps-0" id="email" name="email"
+                                           placeholder="name@example.com"
+                                           value="{{ form_data.email|default:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="phone" class="form-label small fw-semibold text-dark">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="phone" name="phone"
+                                           placeholder="e.g. 9876543210"
+                                           value="{{ form_data.phone|default:'' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password Row -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <label for="password" class="form-label small fw-semibold text-dark">
+                                    Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                                    <input type="password" class="form-control border-start-0 ps-0" id="password" name="password"
+                                           placeholder="Create password" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="password_confirm" class="form-label small fw-semibold text-dark">
+                                    Confirm Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-shield-lock"></i></span>
+                                    <input type="password" class="form-control border-start-0 ps-0" id="password_confirm" name="password_confirm"
+                                           placeholder="Repeat password" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Role Status Notice Box -->
+                        <div class="mb-4 p-3 rounded" id="role-notice-box" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="d-flex">
+                                <i class="bi bi-info-circle-fill text-primary me-2 fs-5 mt-1" id="role-notice-icon"></i>
+                                <div>
+                                    <strong id="role-notice-title" class="small text-dark d-block">Devotee Registration</strong>
+                                    <span id="role-notice-desc" class="small text-muted">
+                                        Devotee accounts are activated immediately upon registration. You can log in and start participating right away.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-heritage-primary py-2 fw-bold" id="submit-btn">
+                                <i class="bi bi-person-check me-2"></i><span id="submit-btn-text">Register as Devotee</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Link to Login -->
+                    <div class="mt-4 pt-3 border-top text-center">
+                        <p class="small text-muted mb-0">
+                            Already have an account?
+                            <a href="{% url 'login' %}" class="fw-semibold text-decoration-none" style="color: var(--hh-primary);">
+                                Sign in here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informational Note -->
+            <div class="text-center mt-3 small text-muted">
+                <i class="bi bi-shield-lock me-1"></i> Public registration provides Devotee, Trustee, and Staff portal onboarding. System Administrator accounts are provisioned internally.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const roleInputs = document.querySelectorAll('input[name="role"]');
+        const instContainer = document.getElementById("institution-select-container");
+        const instSelect = document.getElementById("institution");
+        const submitBtnText = document.getElementById("submit-btn-text");
+        const roleNoticeTitle = document.getElementById("role-notice-title");
+        const roleNoticeDesc = document.getElementById("role-notice-desc");
+
+        function updateRoleUI(role) {
+            if (role === "Staff") {
+                instContainer.style.display = "block";
+                if (instSelect) instSelect.setAttribute("required", "required");
+                submitBtnText.textContent = "Submit Staff Registration";
+                roleNoticeTitle.textContent = "Staff Registration (Pending Approval)";
+                roleNoticeDesc.textContent = "Staff registrations require Administrator approval before account activation. You will be able to log in once your application has been verified.";
+            } else if (role === "Trustee") {
+                instContainer.style.display = "none";
+                if (instSelect) instSelect.removeAttribute("required");
+                submitBtnText.textContent = "Submit Trustee Registration";
+                roleNoticeTitle.textContent = "Trustee Registration (Pending Approval)";
+                roleNoticeDesc.textContent = "Trustee accounts require Administrator review and approval before login access is granted. After approval, you can register and manage heritage institutions.";
+            } else {
+                // Devotee
+                instContainer.style.display = "none";
+                if (instSelect) instSelect.removeAttribute("required");
+                submitBtnText.textContent = "Register as Devotee";
+                roleNoticeTitle.textContent = "Devotee Registration (Instant Access)";
+                roleNoticeDesc.textContent = "Devotee accounts are activated immediately upon registration. You can log in and start participating right away.";
+            }
+        }
+
+        roleInputs.forEach(function (radio) {
+            radio.addEventListener("change", function () {
+                if (this.checked) {
+                    updateRoleUI(this.value);
+                }
+            });
+        });
+
+        // Initialize state on load
+        const selectedRole = document.querySelector('input[name="role"]:checked');
+        if (selectedRole) {
+            updateRoleUI(selectedRole.value);
+        }
+    });
+</script>
+{% endblock %}

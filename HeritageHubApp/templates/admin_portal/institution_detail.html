@@ -1,0 +1,190 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Institution Dossier: {{ institution.name }} - HeritageHub Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb & Header -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'admin_institution_list' %}">Institutions</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ institution.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header with Action Buttons -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h3 class="fw-bold text-dark mb-0">{{ institution.name }}</h3>
+                        {% if institution.approval_status == 'Approved' %}
+                            <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                        {% elif institution.approval_status == 'Pending' %}
+                            <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pending Review</span>
+                        {% else %}
+                            <span class="badge bg-danger px-2 py-1"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-muted small">
+                        <span class="badge bg-light text-dark border me-2">{{ institution.get_institution_type_display }}</span>
+                        Registered on: {{ institution.registered_date|date:"d M Y, h:i A" }}
+                    </div>
+                </div>
+
+                <!-- Approve / Reject Controls -->
+                <div class="d-flex gap-2">
+                    {% if institution.approval_status != 'Approved' %}
+                    <form method="POST" action="{% url 'admin_institution_approve' institution.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success fw-semibold">
+                            <i class="bi bi-check-circle me-1"></i>Approve Institution
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% if institution.approval_status != 'Rejected' %}
+                    <form method="POST" action="{% url 'admin_institution_reject' institution.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger fw-semibold" onclick="return confirm('Are you sure you want to reject {{ institution.name }}?')">
+                            <i class="bi bi-x-circle me-1"></i>Reject Institution
+                        </button>
+                    </form>
+                    {% endif %}
+                    <a href="{% url 'admin_institution_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 Macro Metrics for this Institution -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm text-center p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Cultural Assets</div>
+                <div class="fs-4 fw-bold text-dark">{{ assets_count }}</div>
+                <div class="small text-muted">Valuation: ₹{{ total_valuation|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm text-center p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Donations Collected</div>
+                <div class="fs-4 fw-bold text-success">₹{{ donations_total|floatformat:2 }}</div>
+                <div class="small text-muted">{{ donations_count }} receipts</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm text-center p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Approved Expenses</div>
+                <div class="fs-4 fw-bold text-danger">₹{{ expenses_total|floatformat:2 }}</div>
+                <div class="small text-muted">{{ expenses_count }} vouchers</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm text-center p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Personnel Assigned</div>
+                <div class="fs-4 fw-bold text-primary">{{ trustees.count|add:staff_members.count }}</div>
+                <div class="small text-muted">{{ trustees.count }} Trustees, {{ staff_members.count }} Staff</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Legal & Contact Profile -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-file-earmark-text text-primary me-2"></i>Legal & Contact Profile
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted small">Authorized Representative:</dt>
+                        <dd class="col-sm-8 fw-semibold text-dark">{{ institution.authorized_representative }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">Contact Number:</dt>
+                        <dd class="col-sm-8">{{ institution.contact_number }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">Email Address:</dt>
+                        <dd class="col-sm-8">{{ institution.email }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">PAN Identifier:</dt>
+                        <dd class="col-sm-8 font-monospace">{{ institution.pan|default:"Not provided" }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">Address:</dt>
+                        <dd class="col-sm-8">{{ institution.address }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">Registration Document:</dt>
+                        <dd class="col-sm-8">
+                            {% if institution.registration_certificate %}
+                                <a href="{{ institution.registration_certificate.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-file-earmark-arrow-down me-1"></i>Download Certificate
+                                </a>
+                            {% else %}
+                                <span class="text-muted small">No certificate uploaded</span>
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Assigned Trustees & Staff -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-people-fill text-warning me-2"></i>Institution Governance Team
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6 class="small fw-bold text-uppercase text-muted mb-2">Trustees / Administrators</h6>
+                    {% if trustees %}
+                    <ul class="list-group list-group-flush mb-3 small">
+                        {% for t in trustees %}
+                        <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ t.user.username }}</strong> ({{ t.user.get_full_name|default:t.user.email }})
+                                <div class="text-muted" style="font-size: 0.75rem;">Phone: {{ t.phone|default:"—" }}</div>
+                            </div>
+                            <span class="badge {% if t.approval_status == 'Approved' %}bg-success{% elif t.approval_status == 'Pending' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                {{ t.approval_status }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                        <p class="small text-muted mb-3">No Trustees assigned to this institution.</p>
+                    {% endif %}
+
+                    <h6 class="small fw-bold text-uppercase text-muted mb-2">Staff Personnel</h6>
+                    {% if staff_members %}
+                    <ul class="list-group list-group-flush small">
+                        {% for s in staff_members %}
+                        <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ s.user.username }}</strong> ({{ s.user.get_full_name|default:s.user.email }})
+                                <div class="text-muted" style="font-size: 0.75rem;">Phone: {{ s.phone|default:"—" }}</div>
+                            </div>
+                            <span class="badge {% if s.approval_status == 'Approved' %}bg-success{% elif s.approval_status == 'Pending' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                {{ s.approval_status }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                        <p class="small text-muted mb-0">No Staff personnel assigned to this institution.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

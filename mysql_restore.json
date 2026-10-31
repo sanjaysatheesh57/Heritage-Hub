@@ -1,0 +1,170 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$svtigp6ZjJ1SJx6PLZoJkQ$wnauuX1AnOlqdKNJj74dRxX/i/Pr+mBjNqht6uQulEI=",
+      "last_login": "2026-09-06T07:38:44.511Z",
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "admin@example.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-09-06T07:29:10.346Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$bvd4MthL0UTq2wr5ELJ1nD$ksXIEhqalxtKnD0OGPnc0hBkMVtOILnp3PcPGgEDv9I=",
+      "last_login": "2026-09-06T14:45:18.583Z",
+      "is_superuser": false,
+      "username": "devotee1",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-09-06T07:45:35.282Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$nbT4FJEHeEUFkshw35pXr5$IKA235uzjH3tgxRpPueOJ2oDf4treY1ptituOhfQP70=",
+      "last_login": "2026-09-06T14:41:55.785Z",
+      "is_superuser": false,
+      "username": "staff1",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-09-06T07:47:11.498Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$RQ6iroez80yXUSplThZyjK$zbfIkhW0iEsB1vZfNhkVONF58wSqXTCcLTLIAmP28lg=",
+      "last_login": "2026-09-06T14:41:55.804Z",
+      "is_superuser": false,
+      "username": "trustee1",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-09-06T07:49:24.426Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 5,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$SLlVXU5JRVTUjWZZT0ZEZW$HmAx3Gkqy6msdhJzbOp1sgrveCsRPorPpyKpLhyFL8A=",
+      "last_login": "2026-09-06T14:41:55.821Z",
+      "is_superuser": false,
+      "username": "officer1",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-09-06T07:50:41.937Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 7,
+    "fields": {
+      "password": "pbkdf2_sha256$720000$aTa9zsL4gYOq4nb5FAQSEo$sABOGM98isDO14BOhihsKm6vPGwv8wonZkgkx/G0QgU=",
+      "last_login": "2026-09-06T15:05:34.189Z",
+      "is_superuser": false,
+      "username": "arjun_m",
+      "first_name": "Arjun",
+      "last_name": "Menon",
+      "email": "arjun.menon@example.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-09-06T15:05:07.365Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "HeritageHubApp.userprofile",
+    "pk": 1,
+    "fields": {
+      "user": 2,
+      "role": "Devotee",
+      "institution": null,
+      "phone": ""
+    }
+  },
+  {
+    "model": "HeritageHubApp.userprofile",
+    "pk": 2,
+    "fields": {
+      "user": 5,
+      "role": "Officer",
+      "institution": null,
+      "phone": ""
+    }
+  },
+  {
+    "model": "HeritageHubApp.userprofile",
+    "pk": 3,
+    "fields": {
+      "user": 3,
+      "role": "Staff",
+      "institution": null,
+      "phone": ""
+    }
+  },
+  {
+    "model": "HeritageHubApp.userprofile",
+    "pk": 4,
+    "fields": {
+      "user": 4,
+      "role": "Trustee",
+      "institution": null,
+      "phone": ""
+    }
+  },
+  {
+    "model": "HeritageHubApp.userprofile",
+    "pk": 6,
+    "fields": {
+      "user": 7,
+      "role": "Devotee",
+      "institution": null,
+      "phone": "9876543210"
+    }
+  },
+  {
+    "model": "HeritageHubApp.auditlog",
+    "pk": 2,
+    "fields": {
+      "user": 7,
+      "action": "User Registration",
+      "description": "New Devotee account registered: arjun_m (arjun.menon@example.com).",
+      "timestamp": "2026-09-06T15:05:07.675Z"
+    }
+  }
+]

@@ -1,0 +1,263 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Donation Record #{{ donation.id }} - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .detail-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+        background: #fff;
+    }
+    .detail-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .spec-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f5f5f4;
+    }
+    .spec-item:last-child {
+        border-bottom: none;
+    }
+    .spec-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--hh-text-muted);
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    .spec-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--hh-text);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">
+                <i class="bi bi-heart text-warning me-2"></i>
+                Donation Record #{{ donation.id }}
+            </h3>
+            <p class="text-muted mb-0">Custodial record for <strong>{{ donation.institution.name }}</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'trustee_donation_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>All Donations
+            </a>
+            {% if donation.receipt %}
+                <a href="{% url 'trustee_receipt_view' donation.id %}" class="btn btn-heritage-primary">
+                    <i class="bi bi-printer me-1"></i>View Digital Receipt
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Donation Dossier Card -->
+    <div class="card detail-card mb-4">
+        <div class="detail-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h5 class="mb-0 text-white fw-bold">
+                    {{ donation.donor_name }} &bull; ₹{{ donation.amount|floatformat:2 }}
+                </h5>
+                <small class="text-light opacity-75">Recorded on {{ donation.donation_date|date:"d M Y, h:i A" }}</small>
+            </div>
+            <div>
+                {% if donation.payment_status == 'Success' %}
+                    <span class="badge bg-success px-3 py-2 fs-6">
+                        <i class="bi bi-check-circle-fill me-1"></i>Funds Received (Success)
+                    </span>
+                {% elif donation.payment_status == 'Pending' %}
+                    <span class="badge bg-warning text-dark px-3 py-2 fs-6">
+                        <i class="bi bi-hourglass-split me-1"></i>Payment Pending
+                    </span>
+                {% else %}
+                    <span class="badge bg-danger px-3 py-2 fs-6">
+                        <i class="bi bi-x-circle-fill me-1"></i>Payment Failed
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body p-4 p-md-5">
+            <div class="row g-4">
+                <!-- Left: Core Specifications -->
+                <div class="col-lg-7">
+                    <div class="p-4 bg-light rounded-3">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-info-circle me-2 text-warning"></i>Contribution Specifications
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Donor Full Name</div>
+                                <div class="spec-value">{{ donation.donor_name }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Donor Email</div>
+                                <div class="spec-value">{{ donation.donor_email|default:"Not provided" }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Donation Amount</div>
+                                <div class="spec-value text-success fw-bold fs-5">₹{{ donation.amount|floatformat:2 }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Donation Method</div>
+                                <div class="spec-value">
+                                    {% if donation.donation_type == 'Online' %}
+                                        <span class="badge bg-info text-dark">Online Payment</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Manual Cash</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Earmarked Purpose</div>
+                                <div class="spec-value">{{ donation.purpose }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Transaction Reference</div>
+                                <div class="spec-value font-monospace">{{ donation.transaction_id|default:"N/A" }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Contribution Timestamp</div>
+                                <div class="spec-value">{{ donation.donation_date|date:"d M Y, h:i A" }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Beneficiary Institution</div>
+                                <div class="spec-value">{{ donation.institution.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Receipt & Funding Linkages -->
+                <div class="col-lg-5">
+                    <!-- Digital Receipt Card -->
+                    <div class="border rounded-3 p-4 mb-4 bg-white shadow-sm">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-receipt-cutoff me-2 text-warning"></i>Digital Receipt Record
+                        </h6>
+                        {% if donation.receipt %}
+                            <div class="mb-3">
+                                <div class="small text-muted">Receipt Number:</div>
+                                <div class="fw-bold fs-5 text-dark">{{ donation.receipt.receipt_number }}</div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="small text-muted">Generated On:</div>
+                                <div class="text-dark">{{ donation.receipt.generated_date|date:"d M Y, h:i A" }}</div>
+                            </div>
+                            <a href="{% url 'trustee_receipt_view' donation.id %}" class="btn btn-heritage-outline w-100">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>View Official Receipt
+                            </a>
+                        {% else %}
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1"></i>No digital receipt issued for this transaction. Receipts are generated automatically upon successful payment.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Linked Expenses (if any) -->
+                    <div class="border rounded-3 p-4 bg-white shadow-sm">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-link-45deg me-2 text-warning"></i>Linked Expenses
+                        </h6>
+                        {% if linked_expenses %}
+                            <div class="small text-muted mb-2">Institutional expenses earmarked to this donation:</div>
+                            <ul class="list-group list-group-flush small">
+                                {% for exp in linked_expenses %}
+                                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <a href="{% url 'trustee_expense_detail' exp.id %}" class="fw-semibold text-dark text-decoration-none">
+                                                {{ exp.title }}
+                                            </a>
+                                            <div class="text-muted small">₹{{ exp.amount|floatformat:2 }} &bull; {{ exp.status }}</div>
+                                        </div>
+                                        <span class="badge {% if exp.status == 'Approved' %}bg-success{% elif exp.status == 'Pending' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                            {{ exp.status }}
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div class="text-muted small">
+                                No institutional expenses are currently linked to this donation record.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

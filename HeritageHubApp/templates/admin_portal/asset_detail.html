@@ -1,0 +1,141 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Asset Dossier: {{ asset.name }} - HeritageHub Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'admin_asset_list' %}">Cultural Assets</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ asset.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header Card -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h3 class="fw-bold text-dark mb-0">{{ asset.name }}</h3>
+                        <span class="badge {% if asset.condition == 'Excellent' %}bg-success{% elif asset.condition == 'Good' %}bg-primary{% elif asset.condition == 'Needs Maintenance' %}bg-warning text-dark{% else %}bg-danger{% endif %} px-2 py-1">
+                            {{ asset.condition }}
+                        </span>
+                    </div>
+                    <div class="text-muted small">
+                        <span class="badge bg-light text-dark border me-1">{{ asset.asset_type }}</span>
+                        <span class="badge bg-light text-dark border me-2">{{ asset.category }}</span>
+                        Institution: <strong class="text-dark">{{ asset.institution.name }}</strong>
+                    </div>
+                </div>
+                <div>
+                    <a href="{% url 'admin_asset_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Assets
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Asset Details -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-info-circle text-primary me-2"></i>Asset Specifications</h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted small">Current Valuation:</dt>
+                        <dd class="col-sm-8 fw-bold text-success fs-5">₹{{ asset.current_valuation|floatformat:2 }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">Estimated Value:</dt>
+                        <dd class="col-sm-8 text-dark">₹{{ asset.estimated_value|floatformat:2 }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">Acquisition Date:</dt>
+                        <dd class="col-sm-8">{{ asset.acquisition_date|date:"d M Y"|default:"Not recorded" }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">Storage / Display Location:</dt>
+                        <dd class="col-sm-8">{{ asset.storage_location|default:"Not specified" }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">Description:</dt>
+                        <dd class="col-sm-8">{{ asset.description|default:"No description recorded." }}</dd>
+
+                        <dt class="col-sm-4 text-muted small">Cataloged Timestamp:</dt>
+                        <dd class="col-sm-8 small text-muted">{{ asset.created_at|date:"d M Y, h:i A" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Asset Photo / Visual Record -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-camera text-secondary me-2"></i>Visual Archive</h6>
+                </div>
+                <div class="card-body text-center d-flex flex-column justify-content-center align-items-center p-4">
+                    {% if asset.photograph %}
+                        <img src="{{ asset.photograph.url }}" alt="{{ asset.name }}" class="img-fluid rounded shadow-sm mb-2" style="max-height: 250px;">
+                    {% else %}
+                        <i class="bi bi-image text-muted fs-1 mb-2"></i>
+                        <div class="text-muted small">No photo available in archive</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance History for this Asset -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-tools text-warning me-2"></i>Conservation & Maintenance History</h6>
+        </div>
+        <div class="card-body p-0">
+            {% if maintenance_records %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Work Title</th>
+                            <th>Status</th>
+                            <th>Scheduled Date</th>
+                            <th>Completion Date</th>
+                            <th>Est. Cost</th>
+                            <th>Actual Cost</th>
+                            <th>Performed By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in maintenance_records %}
+                        <tr>
+                            <td class="fw-semibold text-dark">{{ m.title }}</td>
+                            <td>
+                                <span class="badge {% if m.status == 'Completed' %}bg-success{% elif m.status == 'In Progress' %}bg-primary{% elif m.status == 'Scheduled' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ m.status }}
+                                </span>
+                            </td>
+                            <td class="small text-muted">{{ m.scheduled_date|date:"d M Y" }}</td>
+                            <td class="small text-muted">{{ m.completion_date|date:"d M Y"|default:"—" }}</td>
+                            <td class="small">₹{{ m.estimated_cost|floatformat:2 }}</td>
+                            <td class="small fw-semibold">₹{{ m.actual_cost|floatformat:2 }}</td>
+                            <td class="small text-muted">{{ m.performed_by|default:"—" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted small">
+                No maintenance history recorded for this asset.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

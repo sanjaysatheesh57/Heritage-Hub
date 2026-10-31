@@ -1,0 +1,185 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title %}Donation Receipt {{ receipt.receipt_number }} — HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+    /* Hide navigation, footer, breadcrumbs, action buttons */
+    nav, footer, .navbar, .no-print, .breadcrumb, .btn, .alert {
+        display: none !important;
+    }
+    body {
+        background: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .receipt-container {
+        box-shadow: none !important;
+        border: 2px solid #333 !important;
+        padding: 24px !important;
+        max-width: 100% !important;
+    }
+}
+.receipt-stamp {
+    border: 2px dashed #9a3412;
+    padding: 8px 16px;
+    display: inline-block;
+    color: #9a3412;
+    font-weight: bold;
+    letter-spacing: 1px;
+    border-radius: 4px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Non-print navigation bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'staff_dashboard' %}">Staff Portal</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'staff_donation_list' %}">Cash Donations</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Receipt #{{ receipt.receipt_number }}</li>
+            </ol>
+        </nav>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-primary fw-semibold shadow-sm" style="background-color: var(--hh-primary, #9a3412); border-color: var(--hh-primary, #9a3412);">
+                <i class="bi bi-printer me-1"></i>Print Receipt
+            </button>
+            <a href="{% url 'staff_donation_add' %}" class="btn btn-outline-warning text-dark fw-semibold">
+                <i class="bi bi-plus-lg me-1"></i>New Entry
+            </a>
+            <a href="{% url 'staff_donation_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Ledger
+            </a>
+        </div>
+    </div>
+
+    <!-- Official Printable Receipt Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border receipt-container p-4 p-md-5 bg-white">
+                <!-- Receipt Header -->
+                <div class="text-center pb-4 mb-4 border-bottom border-2">
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                        <i class="bi bi-bank2 fs-2 text-warning"></i>
+                        <h2 class="fw-bold mb-0 text-dark" style="letter-spacing: 1px;">HERITAGEHUB</h2>
+                    </div>
+                    <p class="text-muted small mb-2 text-uppercase fw-semibold" style="letter-spacing: 2px;">
+                        Cultural Heritage Asset and Trust Management Information System
+                    </p>
+                    <div class="badge bg-warning text-dark px-3 py-1 fs-6 mb-3">
+                        OFFICIAL DONATION RECEIPT
+                    </div>
+                    <h4 class="fw-bold text-dark mb-1">{{ institution.name }}</h4>
+                    <p class="text-muted small mb-0">{{ institution.address }}</p>
+                    {% if institution.pan %}
+                        <p class="text-muted small mb-0">Trust PAN: <strong>{{ institution.pan }}</strong></p>
+                    {% endif %}
+                </div>
+
+                <!-- Receipt Number & Ref -->
+                <div class="row g-3 mb-4 pb-3 border-bottom">
+                    <div class="col-sm-6">
+                        <small class="text-muted text-uppercase d-block fw-bold" style="font-size: 0.75rem;">Receipt Number</small>
+                        <span class="fs-5 fw-bold font-monospace text-dark">{{ receipt.receipt_number }}</span>
+                    </div>
+                    <div class="col-sm-6 text-sm-end">
+                        <small class="text-muted text-uppercase d-block fw-bold" style="font-size: 0.75rem;">Date of Ingestion</small>
+                        <span class="fw-semibold text-dark">{{ donation.donation_date|date:"d F Y, h:i A" }}</span>
+                    </div>
+                </div>
+
+                <!-- Structured Donation Details -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="bg-light w-35 text-secondary">Institution Name</th>
+                                <td class="fw-bold text-dark">{{ institution.name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary">Receipt Number</th>
+                                <td class="font-monospace fw-bold text-primary">{{ receipt.receipt_number }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary">Donor Name</th>
+                                <td class="fw-bold text-dark">{{ donation.donor_name }}</td>
+                            </tr>
+                            {% if donation.donor_email %}
+                            <tr>
+                                <th class="bg-light text-secondary">Donor Email</th>
+                                <td>{{ donation.donor_email }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th class="bg-light text-secondary">Donation Type</th>
+                                <td>
+                                    <span class="badge bg-warning text-dark border">
+                                        <i class="bi bi-cash me-1"></i>Cash
+                                    </span>
+                                    <small class="text-muted ms-2">(Physical Counter Offering)</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary">Purpose</th>
+                                <td>{{ donation.purpose }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary">Cash Reference</th>
+                                <td class="font-monospace text-muted">{{ donation.transaction_id }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary">Donation Date</th>
+                                <td>{{ donation.donation_date|date:"d M Y, h:i A" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary">Payment Status</th>
+                                <td>
+                                    <span class="badge bg-success text-white">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Success
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="table-light">
+                                <th class="fs-5 text-dark align-middle">Amount Received</th>
+                                <td class="fs-4 fw-bold text-success">
+                                    ₹{{ donation.amount|floatformat:2 }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Verification Stamp & Signatory Note -->
+                <div class="row align-items-center justify-content-between pt-3 mt-2">
+                    <div class="col-sm-6 mb-3 mb-sm-0">
+                        <div class="receipt-stamp text-center">
+                            <small class="d-block text-uppercase" style="font-size: 0.65rem;">CASH COUNTER VERIFIED</small>
+                            <span style="font-size: 0.9rem;">OFFICIAL RECEIPT</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 text-sm-end">
+                        <small class="text-muted d-block">Authorized Signatory / Seal</small>
+                        <div class="mt-4 pt-2 border-top d-inline-block" style="min-width: 180px;">
+                            <small class="text-muted">For {{ institution.name }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Note -->
+                <div class="text-center pt-4 mt-4 border-top">
+                    <small class="text-muted d-block">
+                        This is an official system-generated receipt issued through HeritageHub MIS.
+                        Physical currency has been received and deposited in the institutional trust treasury.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

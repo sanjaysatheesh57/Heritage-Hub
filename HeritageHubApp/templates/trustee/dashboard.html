@@ -1,0 +1,572 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Trustee Dashboard - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        background: #fff;
+    }
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.9rem;
+        color: var(--hh-text-muted);
+        margin-top: 0.25rem;
+    }
+    .inst-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .inst-card .card-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .empty-state {
+        text-align: center;
+        padding: 3.5rem 1.5rem;
+        color: var(--hh-text-muted);
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #d6d3d1;
+    }
+    .status-banner-pending {
+        background-color: #fffbeb;
+        border: 1px solid #fde68a;
+        border-left: 5px solid #f59e0b;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+    }
+    .status-banner-approved {
+        background-color: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-left: 5px solid #22c55e;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+    }
+    .status-banner-rejected {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-left: 5px solid #ef4444;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Welcome Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-person-badge text-warning me-2"></i>
+                Welcome, {{ request.user.first_name|default:request.user.username }}!
+            </h3>
+            <p class="text-muted mb-0">Trustee & Administration Portal</p>
+        </div>
+        <div>
+            <span class="badge badge-role-trustee px-3 py-2 fs-6">
+                <i class="bi bi-shield-lock me-1"></i>Trustee Account
+            </span>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_event_list' %}">
+                    <i class="bi bi-calendar-event me-1"></i>Events & Festivals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_maintenance_list' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Works
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_staff_list' %}">
+                    <i class="bi bi-people me-1"></i>Staff Members
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Reports & Analytics
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    {% if institution %}
+        <!-- Status Banner -->
+        {% if institution.approval_status == 'Pending' %}
+            <div class="status-banner-pending mb-4 d-flex align-items-center">
+                <i class="bi bi-hourglass-split text-warning fs-3 me-3"></i>
+                <div>
+                    <h6 class="fw-bold text-dark mb-1">Registration Pending Administrative Approval</h6>
+                    <p class="mb-0 text-muted small">
+                        Your institution application for <strong>{{ institution.name }}</strong> has been submitted and is awaiting administrative review.
+                        Once approved, it will be visible on the public portal and can accept donations.
+                    </p>
+                </div>
+            </div>
+        {% elif institution.approval_status == 'Approved' %}
+            <div class="status-banner-approved mb-4 d-flex align-items-center">
+                <i class="bi bi-check-circle-fill text-success fs-3 me-3"></i>
+                <div>
+                    <h6 class="fw-bold text-dark mb-1">Institution Verified & Active</h6>
+                    <p class="mb-0 text-muted small">
+                        <strong>{{ institution.name }}</strong> is officially approved and active. Devotees can view and contribute to your institution through the donation portal.
+                    </p>
+                </div>
+            </div>
+        {% elif institution.approval_status == 'Rejected' %}
+            <div class="status-banner-rejected mb-4 d-flex align-items-center">
+                <i class="bi bi-x-circle-fill text-danger fs-3 me-3"></i>
+                <div>
+                    <h6 class="fw-bold text-dark mb-1">Registration Rejected</h6>
+                    <p class="mb-0 text-muted small">
+                        The application for <strong>{{ institution.name }}</strong> was reviewed and not approved. Please contact the administrator for further guidance.
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Institution Details Card -->
+        <div class="card inst-card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-bank2 fs-4 text-warning me-2"></i>
+                    <div>
+                        <h5 class="mb-0 text-white fw-bold">{{ institution.name }}</h5>
+                        <small class="text-light opacity-75">{{ institution.get_institution_type_display }}</small>
+                    </div>
+                </div>
+                <div>
+                    {% if institution.approval_status == 'Approved' %}
+                        <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                    {% elif institution.approval_status == 'Pending' %}
+                        <span class="badge bg-warning text-dark px-3 py-2"><i class="bi bi-clock me-1"></i>Pending Review</span>
+                    {% else %}
+                        <span class="badge bg-danger px-3 py-2"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <span class="text-muted small d-block">Authorized Representative</span>
+                            <span class="fw-semibold text-dark">{{ institution.authorized_representative }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <span class="text-muted small d-block">Contact Number</span>
+                            <span class="fw-semibold text-dark">{{ institution.contact_number }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <span class="text-muted small d-block">Official Email</span>
+                            <span class="fw-semibold text-dark">{{ institution.email }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <span class="text-muted small d-block">PAN / Tax ID</span>
+                            <span class="fw-semibold text-dark">{{ institution.pan|default:"Not provided" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="p-3 bg-light rounded-3">
+                            <span class="text-muted small d-block">Official Address</span>
+                            <span class="fw-semibold text-dark">{{ institution.address }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <span class="text-muted small d-block">Registration Date</span>
+                            <span class="fw-semibold text-dark">{{ institution.registered_date|date:"d M Y, h:i A" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <span class="text-muted small d-block">Registration Certificate</span>
+                            {% if institution.registration_certificate %}
+                                <a href="{{ institution.registration_certificate.url }}" target="_blank" class="text-primary fw-semibold text-decoration-none">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i>View Uploaded Document
+                                </a>
+                            {% else %}
+                                <span class="text-muted fst-italic">No document uploaded</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Asset Management Overview Card -->
+        <div class="card inst-card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-box-seam fs-4 text-warning me-2"></i>
+                    <div>
+                        <h5 class="mb-0 text-white fw-bold">Heritage Asset Registry</h5>
+                        <small class="text-light opacity-75">Custodial movable & immovable asset tracking</small>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'trustee_asset_add' %}" class="btn btn-sm btn-heritage-gold">
+                        <i class="bi bi-plus-circle me-1"></i>Add Asset
+                    </a>
+                    <a href="{% url 'trustee_asset_list' %}" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-list-ul me-1"></i>View All ({{ total_assets|default:0 }})
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <div class="p-3 bg-light rounded-3 text-center">
+                            <span class="text-muted small d-block">Total Assets</span>
+                            <span class="fs-4 fw-bold text-dark">{{ total_assets|default:0 }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="p-3 bg-light rounded-3 text-center">
+                            <span class="text-muted small d-block">Total Valuation</span>
+                            <span class="fs-4 fw-bold text-primary">₹{{ total_valuation|default:0|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 bg-light rounded-3 text-center">
+                            <span class="text-muted small d-block">Needs Maintenance / Damaged</span>
+                            <span class="fs-4 fw-bold {% if needs_maintenance_count %}text-warning{% else %}text-success{% endif %}">
+                                {{ needs_maintenance_count|default:0 }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if recent_assets %}
+                    <div class="mt-4">
+                        <h6 class="fw-bold text-dark mb-3">Recently Cataloged Assets</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Asset Name</th>
+                                        <th>Classification</th>
+                                        <th>Category</th>
+                                        <th>Valuation</th>
+                                        <th>Condition</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for a in recent_assets %}
+                                        <tr>
+                                            <td class="fw-semibold">{{ a.name }}</td>
+                                            <td><span class="badge bg-secondary">{{ a.asset_type }}</span></td>
+                                            <td class="small text-muted">{{ a.category }}</td>
+                                            <td>₹{{ a.current_valuation|floatformat:2 }}</td>
+                                            <td>
+                                                {% if a.condition == 'Excellent' %}
+                                                    <span class="badge bg-success">Excellent</span>
+                                                {% elif a.condition == 'Good' %}
+                                                    <span class="badge bg-primary">Good</span>
+                                                {% elif a.condition == 'Needs Maintenance' %}
+                                                    <span class="badge bg-warning text-dark">Maintenance</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Damaged</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{% url 'trustee_asset_detail' a.id %}" class="btn btn-sm btn-outline-primary">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-3 text-muted mt-3">
+                        <p class="mb-2 small">No heritage assets cataloged yet for this institution.</p>
+                        <a href="{% url 'trustee_asset_add' %}" class="btn btn-sm btn-heritage-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Catalog First Asset
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Finance & Accounts Overview Card -->
+        <div class="card inst-card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-cash-stack fs-4 text-warning me-2"></i>
+                    <div>
+                        <h5 class="mb-0 text-white fw-bold">Donation & Finance Overview</h5>
+                        <small class="text-light opacity-75">Institutional treasury, contributions & disbursements</small>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'trustee_expense_add' %}" class="btn btn-sm btn-heritage-gold">
+                        <i class="bi bi-dash-circle me-1"></i>Record Expense
+                    </a>
+                    <a href="{% url 'trustee_finance_dashboard' %}" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-speedometer2 me-1"></i>Full Finance Portal
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3 text-center">
+                            <span class="text-muted small d-block">Received Donations</span>
+                            <span class="fs-4 fw-bold text-success">₹{{ received_donations|default:0|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3 text-center">
+                            <span class="text-muted small d-block">Approved Expenses</span>
+                            <span class="fs-4 fw-bold text-primary">₹{{ approved_expenses|default:0|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3 text-center">
+                            <span class="text-muted small d-block">Net Available Funds</span>
+                            <span class="fs-4 fw-bold text-dark">₹{{ net_available|default:0|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3 text-center {% if pending_expenses_count %}border-warning bg-warning-subtle{% endif %}">
+                            <span class="text-muted small d-block">Pending Major Expenses</span>
+                            <span class="fs-4 fw-bold {% if pending_expenses_count %}text-warning{% else %}text-muted{% endif %}">
+                                {{ pending_expenses_count|default:0 }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+                    <a href="{% url 'trustee_donation_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-heart me-1"></i>View All Donations
+                    </a>
+                    <a href="{% url 'trustee_expense_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-receipt me-1"></i>View All Expenses
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events & Maintenance Overview Section -->
+        <div class="row g-4 mb-4">
+            <!-- Events & Festivals Overview Card -->
+            <div class="col-lg-6">
+                <div class="card inst-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-calendar-event fs-4 text-warning me-2"></i>
+                            <div>
+                                <h5 class="mb-0 text-white fw-bold">Events & Festivals</h5>
+                                <small class="text-light opacity-75">Cultural rituals & celebrations</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'trustee_event_add' %}" class="btn btn-sm btn-heritage-gold">
+                                <i class="bi bi-plus-circle me-1"></i>New Event
+                            </a>
+                            <a href="{% url 'trustee_event_list' %}" class="btn btn-sm btn-outline-light">
+                                <i class="bi bi-eye me-1"></i>View All
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <span class="text-muted small d-block">Upcoming / Active</span>
+                                    <span class="fs-4 fw-bold text-primary">{{ upcoming_events_count|default:0 }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <span class="text-muted small d-block">Total Scheduled</span>
+                                    <span class="fs-4 fw-bold text-dark">{{ total_events_count|default:0 }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <span class="text-muted small d-block">Est. Event Budget</span>
+                                    <span class="fs-4 fw-bold text-secondary">₹{{ total_event_estimated_cost|default:0|floatformat:0 }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <span class="text-muted small d-block">Actual Event Spent</span>
+                                    <span class="fs-4 fw-bold text-info">₹{{ total_event_actual_cost|default:0|floatformat:0 }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-3 pt-2 border-top">
+                            <a href="{% url 'trustee_event_list' %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-calendar2-range me-1"></i>Open Event Calendar & Management
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintenance & Conservation Overview Card -->
+            <div class="col-lg-6">
+                <div class="card inst-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-tools fs-4 text-warning me-2"></i>
+                            <div>
+                                <h5 class="mb-0 text-white fw-bold">Maintenance & Conservation</h5>
+                                <small class="text-light opacity-75">Asset restoration & upkeep</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'trustee_maintenance_add' %}" class="btn btn-sm btn-heritage-gold">
+                                <i class="bi bi-plus-circle me-1"></i>Schedule Work
+                            </a>
+                            <a href="{% url 'trustee_maintenance_list' %}" class="btn btn-sm btn-outline-light">
+                                <i class="bi bi-eye me-1"></i>View All
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <span class="text-muted small d-block">Scheduled Works</span>
+                                    <span class="fs-4 fw-bold text-warning">{{ scheduled_maintenance_count|default:0 }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <span class="text-muted small d-block">In Progress</span>
+                                    <span class="fs-4 fw-bold text-primary">{{ in_progress_maintenance_count|default:0 }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <span class="text-muted small d-block">Total Tasks</span>
+                                    <span class="fs-4 fw-bold text-dark">{{ total_maintenance_count|default:0 }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 text-center">
+                                    <span class="text-muted small d-block">Total Maint. Cost</span>
+                                    <span class="fs-4 fw-bold text-info">₹{{ total_maint_actual_cost|default:0|floatformat:0 }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-3 pt-2 border-top">
+                            <a href="{% url 'trustee_maintenance_list' %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-clipboard-check me-1"></i>Open Maintenance Portal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Empty State Card -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+            <div class="empty-state">
+                <i class="bi bi-building-add d-block"></i>
+                <h4 class="fw-bold text-dark mb-2">No Institution Registered Yet</h4>
+                <p class="text-muted mb-4 col-md-7 mx-auto">
+                    As an authorized Trustee, you can submit your Temple, Religious Trust, or Cultural Heritage Institution for registration.
+                    Once submitted, your application will be verified and approved by the system administration.
+                </p>
+                <a href="{% url 'trustee_institution_register' %}" class="btn btn-heritage-primary btn-lg">
+                    <i class="bi bi-building-add me-2"></i>Register Institution Now
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

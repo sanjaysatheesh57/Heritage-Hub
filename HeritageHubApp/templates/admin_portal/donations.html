@@ -1,0 +1,172 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Cross-Institutional Donations - HeritageHub Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb & Header -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Donations & Offerings</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h3 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-cash-stack text-success me-2"></i>System-Wide Donations & Receipts
+            </h3>
+            <p class="text-muted mb-0">Financial monitoring of devotee contributions, online transactions, and counter cash receipts across all institutions.</p>
+        </div>
+    </div>
+
+    <!-- Financial Aggregates KPI Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Total Collections</div>
+                <div class="fs-4 fw-bold text-success">₹{{ successful_total|floatformat:2 }}</div>
+                <div class="small text-muted">{{ total_count }} total entries</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Online Gateway Collections</div>
+                <div class="fs-4 fw-bold text-primary">₹{{ online_total|floatformat:2 }}</div>
+                <div class="small text-muted">Devotee portal receipts</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Cash / Counter Collections</div>
+                <div class="fs-4 fw-bold text-dark">₹{{ cash_total|floatformat:2 }}</div>
+                <div class="small text-muted">Staff physical receipts</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Successful Receipts</div>
+                <div class="fs-4 fw-bold text-warning">{{ successful_count }}</div>
+                <div class="small text-muted">Verified transactions</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body py-3">
+            <form method="GET" class="row g-2 align-items-center">
+                <!-- Institution Filter -->
+                <div class="col-md-4">
+                    <select name="institution" class="form-select form-select-sm">
+                        <option value="">All Institutions</option>
+                        {% for inst in institutions %}
+                            <option value="{{ inst.id }}" {% if selected_institution == inst.id %}selected{% endif %}>{{ inst.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Type Filter -->
+                <div class="col-6 col-md-3">
+                    <select name="type" class="form-select form-select-sm">
+                        <option value="">All Channels (Online/Cash)</option>
+                        <option value="Online" {% if selected_type == 'Online' %}selected{% endif %}>Online Gateway</option>
+                        <option value="Cash" {% if selected_type == 'Cash' %}selected{% endif %}>Physical Counter Cash</option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="col-6 col-md-3">
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Payment Statuses</option>
+                        <option value="Success" {% if selected_status == 'Success' %}selected{% endif %}>Success</option>
+                        <option value="Pending" {% if selected_status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Failed" {% if selected_status == 'Failed' %}selected{% endif %}>Failed</option>
+                    </select>
+                </div>
+
+                <!-- Actions -->
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">Filter</button>
+                    {% if selected_institution or selected_type or selected_status %}
+                        <a href="{% url 'admin_donation_list' %}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Donations Table Card -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            {% if donations %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Receipt / Txn ID</th>
+                            <th>Donor Name</th>
+                            <th>Institution</th>
+                            <th>Amount</th>
+                            <th>Channel</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in donations %}
+                        <tr>
+                            <td class="text-muted small fw-semibold">{{ d.id }}</td>
+                            <td>
+                                {% if d.receipt %}
+                                    <span class="badge bg-light text-dark border font-monospace">{{ d.receipt.receipt_number }}</span>
+                                {% elif d.transaction_id %}
+                                    <span class="small font-monospace text-muted">{{ d.transaction_id|truncatechars:12 }}</span>
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">{{ d.donor_name }}</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">{{ d.donor_email|default:"No email" }}</div>
+                            </td>
+                            <td class="small fw-semibold text-dark">{{ d.institution.name }}</td>
+                            <td class="fw-bold text-success">₹{{ d.amount|floatformat:2 }}</td>
+                            <td>
+                                <span class="badge {% if d.donation_type == 'Online' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                    {{ d.donation_type }}
+                                </span>
+                            </td>
+                            <td class="small text-muted">{{ d.purpose|truncatewords:6 }}</td>
+                            <td>
+                                {% if d.payment_status == 'Success' %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Success</span>
+                                {% elif d.payment_status == 'Pending' %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass me-1"></i>Pending</span>
+                                {% else %}
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ d.donation_date|date:"d M Y, h:i A" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
+                <h5 class="fw-bold mb-1">No Donations Found</h5>
+                <p class="small mb-0">No records match the selected filters.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

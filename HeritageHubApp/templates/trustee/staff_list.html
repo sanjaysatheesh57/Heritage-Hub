@@ -1,0 +1,356 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Staff Monitoring - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .stat-card {
+        border: 1px solid var(--hh-border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        background: #fff;
+    }
+    .stat-card .stat-value {
+        font-size: 1.85rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.8rem;
+        color: var(--hh-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 0.25rem;
+    }
+    .staff-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .staff-card .card-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .empty-state {
+        text-align: center;
+        padding: 3.5rem 1.5rem;
+        color: var(--hh-text-muted);
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #d6d3d1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">
+                <i class="bi bi-people-fill text-info me-2"></i>
+                Staff Monitoring & Personnel
+            </h3>
+            <p class="text-muted mb-0">
+                {% if institution %}
+                    Authorized operational personnel affiliated with <strong>{{ institution.name }}</strong>
+                {% else %}
+                    Staff monitoring overview
+                {% endif %}
+            </p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-light text-secondary border px-3 py-2">
+                <i class="bi bi-eye me-1 text-primary"></i>Read-Only Oversight
+            </span>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_event_list' %}">
+                    <i class="bi bi-calendar-event me-1"></i>Events & Festivals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_maintenance_list' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Works
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_staff_list' %}">
+                    <i class="bi bi-people me-1"></i>Staff Members
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Reports & Analytics
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    {% if not institution %}
+        <!-- Warning Banner: No Institution Registered -->
+        <div class="card border-0 shadow-sm p-4 text-center my-4" style="background-color: #fffdf5; border: 1px solid #fef3c7 !important; border-radius: 12px;">
+            <div class="py-4">
+                <i class="bi bi-building-exclamation text-warning" style="font-size: 3.5rem;"></i>
+                <h4 class="fw-bold mt-3 text-dark">No Institution Registered</h4>
+                <p class="text-muted mx-auto" style="max-width: 540px;">
+                    You are not currently associated with an active heritage institution. Please register your institution first to monitor institutional staff.
+                </p>
+                <a href="{% url 'trustee_institution_register' %}" class="btn btn-heritage-primary mt-2">
+                    <i class="bi bi-building-add me-1"></i>Register Heritage Institution
+                </a>
+            </div>
+        </div>
+    {% else %}
+
+        <!-- Stat Cards Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-value text-dark">{{ total_staff }}</div>
+                    <div class="stat-label">Total Staff</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-value text-success">{{ approved_count }}</div>
+                    <div class="stat-label">Approved & Active</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-value text-warning">{{ pending_count }}</div>
+                    <div class="stat-label">Pending Approval</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-value text-danger">{{ rejected_count }}</div>
+                    <div class="stat-label">Rejected / Inactive</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Card -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 10px;">
+            <div class="card-body p-3">
+                <form method="GET" action="{% url 'trustee_staff_list' %}" class="row g-2 align-items-center">
+                    <div class="col-md-5">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" name="q" class="form-control" placeholder="Search by name, username, email..." value="{{ search_query|default:'' }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group input-group-sm">
+                            <label class="input-group-text bg-light text-muted" for="statusFilter">Status</label>
+                            <select name="status" id="statusFilter" class="form-select">
+                                <option value="">All Statuses</option>
+                                <option value="Approved" {% if current_status == "Approved" %}selected{% endif %}>Approved</option>
+                                <option value="Pending" {% if current_status == "Pending" %}selected{% endif %}>Pending</option>
+                                <option value="Rejected" {% if current_status == "Rejected" %}selected{% endif %}>Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-sm btn-heritage-primary flex-grow-1">
+                            <i class="bi bi-funnel me-1"></i>Filter
+                        </button>
+                        {% if search_query or current_status %}
+                            <a href="{% url 'trustee_staff_list' %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Staff List Table Card -->
+        <div class="card staff-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-white fw-bold">
+                    <i class="bi bi-people me-2 text-warning"></i>
+                    Staff Members — {{ institution.name }}
+                </h5>
+                <span class="badge bg-light text-dark">{{ staff_members|length }} record{{ staff_members|length|pluralize }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if staff_members %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Staff Member</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Institution</th>
+                                    <th>Approval Status</th>
+                                    <th class="pe-4 text-end">Registered Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in staff_members %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center me-3" style="width: 38px; height: 38px;">
+                                                    <i class="bi bi-person text-secondary fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold text-dark">
+                                                        {% if member.user.get_full_name %}
+                                                            {{ member.user.get_full_name }}
+                                                        {% else %}
+                                                            {{ member.user.username }}
+                                                        {% endif %}
+                                                    </div>
+                                                    <small class="text-muted">Staff Account</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <code>{{ member.user.username }}</code>
+                                        </td>
+                                        <td>
+                                            {% if member.user.email %}
+                                                <a href="mailto:{{ member.user.email }}" class="text-decoration-none text-dark">
+                                                    <i class="bi bi-envelope me-1 text-muted"></i>{{ member.user.email }}
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted fst-italic">Not provided</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if member.phone %}
+                                                <span><i class="bi bi-telephone me-1 text-muted"></i>{{ member.phone }}</span>
+                                            {% else %}
+                                                <span class="text-muted fst-italic">Not provided</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">
+                                                <i class="bi bi-building me-1 text-secondary"></i>{{ member.institution.name }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if member.approval_status == 'Approved' %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>Approved
+                                                </span>
+                                            {% elif member.approval_status == 'Pending' %}
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">
+                                                    <i class="bi bi-hourglass-split me-1"></i>Pending Review
+                                                </span>
+                                            {% elif member.approval_status == 'Rejected' %}
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                                    <i class="bi bi-x-circle-fill me-1"></i>Rejected
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ member.approval_status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="pe-4 text-end text-muted small">
+                                            {{ member.user.date_joined|date:"d M Y, h:i A" }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-people"></i>
+                        <h5>No Staff Members Found</h5>
+                        <p class="text-muted mb-0">
+                            {% if search_query or current_status %}
+                                No staff records match your search or filter criteria.
+                            {% else %}
+                                There are currently no staff accounts registered under <strong>{{ institution.name }}</strong>.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-light py-3 px-4">
+                <div class="d-flex align-items-center text-muted small">
+                    <i class="bi bi-shield-lock-fill text-warning me-2 fs-6"></i>
+                    <span>
+                        Staff accounts are approved and managed by System Administrators. This interface provides institution-level operational monitoring.
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}

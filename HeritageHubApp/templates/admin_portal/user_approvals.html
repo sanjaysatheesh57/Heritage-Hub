@@ -1,0 +1,242 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}User Approvals & Verification - HeritageHub Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb & Header -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">User Approvals</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h3 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-person-check-fill text-warning me-2"></i>User Registration Approvals
+            </h3>
+            <p class="text-muted mb-0">Review, verify, and approve or reject Trustee and Staff registration requests.</p>
+        </div>
+        <div>
+            <a href="{% url 'admin_user_list' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-people me-1"></i>All Users Directory
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Filter Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border text-center p-3 rounded-3 {% if current_status == 'Pending' %}border-warning bg-warning bg-opacity-10{% endif %}">
+                <div class="fs-4 fw-bold text-warning">{{ pending_count }}</div>
+                <div class="small text-muted text-uppercase fw-semibold">Pending Verification</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border text-center p-3 rounded-3 {% if current_status == 'Approved' %}border-success bg-success bg-opacity-10{% endif %}">
+                <div class="fs-4 fw-bold text-success">{{ approved_count }}</div>
+                <div class="small text-muted text-uppercase fw-semibold">Approved</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border text-center p-3 rounded-3 {% if current_status == 'Rejected' %}border-danger bg-danger bg-opacity-10{% endif %}">
+                <div class="fs-4 fw-bold text-danger">{{ rejected_count }}</div>
+                <div class="small text-muted text-uppercase fw-semibold">Rejected</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border text-center p-3 rounded-3 {% if current_status == 'all' %}border-dark bg-dark bg-opacity-10{% endif %}">
+                <div class="fs-4 fw-bold text-dark">{{ total_count }}</div>
+                <div class="small text-muted text-uppercase fw-semibold">Total Requests</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search Bar -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body py-2">
+            <div class="row g-2 align-items-center">
+                <!-- Status Filter Pills -->
+                <div class="col-lg-5 col-md-12">
+                    <div class="btn-group btn-group-sm w-100" role="group">
+                        <a href="?status=Pending{% if current_role %}&role={{ current_role }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn {% if current_status == 'Pending' %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary{% endif %}">
+                            Pending ({{ pending_count }})
+                        </a>
+                        <a href="?status=Approved{% if current_role %}&role={{ current_role }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn {% if current_status == 'Approved' %}btn-success text-white fw-bold{% else %}btn-outline-secondary{% endif %}">
+                            Approved ({{ approved_count }})
+                        </a>
+                        <a href="?status=Rejected{% if current_role %}&role={{ current_role }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn {% if current_status == 'Rejected' %}btn-danger text-white fw-bold{% else %}btn-outline-secondary{% endif %}">
+                            Rejected ({{ rejected_count }})
+                        </a>
+                        <a href="?status=all{% if current_role %}&role={{ current_role }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn {% if current_status == 'all' %}btn-dark text-white fw-bold{% else %}btn-outline-secondary{% endif %}">
+                            All ({{ total_count }})
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Role Filter -->
+                <div class="col-lg-3 col-md-5">
+                    <div class="btn-group btn-group-sm w-100" role="group">
+                        <a href="?status={{ current_status }}&role={% if search_query %}&q={{ search_query }}{% endif %}" class="btn {% if not current_role %}btn-secondary active{% else %}btn-outline-secondary{% endif %}">
+                            All Roles
+                        </a>
+                        <a href="?status={{ current_status }}&role=Trustee{% if search_query %}&q={{ search_query }}{% endif %}" class="btn {% if current_role == 'Trustee' %}btn-secondary active{% else %}btn-outline-secondary{% endif %}">
+                            Trustees
+                        </a>
+                        <a href="?status={{ current_status }}&role=Staff{% if search_query %}&q={{ search_query }}{% endif %}" class="btn {% if current_role == 'Staff' %}btn-secondary active{% else %}btn-outline-secondary{% endif %}">
+                            Staff
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Search Input -->
+                <div class="col-lg-4 col-md-7">
+                    <form method="GET" action="{% url 'admin_user_approval_list' %}" class="input-group input-group-sm">
+                        <input type="hidden" name="status" value="{{ current_status }}">
+                        <input type="hidden" name="role" value="{{ current_role }}">
+                        <input type="text" name="q" class="form-control" placeholder="Search applicant or institution..." value="{{ search_query|default:'' }}">
+                        <button type="submit" class="btn btn-heritage-primary">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        {% if search_query %}
+                            <a href="?status={{ current_status }}&role={{ current_role }}" class="btn btn-outline-secondary" title="Clear search">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications Table Card -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            {% if profiles %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Applicant</th>
+                            <th>Role Requested</th>
+                            <th>Target Institution</th>
+                            <th>Phone</th>
+                            <th>Registered Date</th>
+                            <th>Approval Status</th>
+                            <th class="text-center" style="min-width: 180px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in profiles %}
+                        <tr>
+                            <td class="text-muted small fw-semibold">{{ p.user.id }}</td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ p.user.get_full_name|default:p.user.username }}</div>
+                                <div class="small text-muted"><i class="bi bi-person me-1"></i>{{ p.user.username }}</div>
+                                <div class="small text-muted"><i class="bi bi-envelope me-1"></i>{{ p.user.email|default:"No email" }}</div>
+                            </td>
+                            <td>
+                                <span class="badge {% if p.role == 'Trustee' %}badge-role-trustee{% elif p.role == 'Staff' %}badge-role-staff{% else %}bg-secondary{% endif %} px-2 py-1">
+                                    {{ p.role }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if p.institution %}
+                                    <div class="fw-semibold small text-dark">{{ p.institution.name }}</div>
+                                    <div class="d-flex align-items-center gap-1 mt-1">
+                                        <span class="badge bg-light text-dark border small">{{ p.institution.get_institution_type_display }}</span>
+                                        {% if p.institution.approval_status == 'Approved' %}
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle small" title="Institution is Approved">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Inst. Approved
+                                            </span>
+                                        {% elif p.institution.approval_status == 'Pending' %}
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle small" title="Institution is pending approval">
+                                                <i class="bi bi-hourglass-split me-1"></i>Inst. Pending
+                                            </span>
+                                        {% elif p.institution.approval_status == 'Rejected' %}
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle small" title="Institution is rejected">
+                                                <i class="bi bi-x-circle-fill me-1"></i>Inst. Rejected
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    {% if p.role == 'Trustee' %}
+                                        <span class="text-muted small fst-italic">None (Registers post-approval)</span>
+                                    {% else %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle small">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>No Institution
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ p.phone|default:"—" }}</td>
+                            <td class="small text-muted">
+                                {{ p.user.date_joined|date:"d M Y" }}<br>
+                                <span class="text-muted" style="font-size: 0.75rem;">{{ p.user.date_joined|date:"h:i A" }}</span>
+                            </td>
+                            <td>
+                                {% if p.approval_status == 'Approved' %}
+                                    <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                                {% elif p.approval_status == 'Pending' %}
+                                    <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                                {% else %}
+                                    <span class="badge bg-danger px-2 py-1"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    {% if p.approval_status != 'Approved' %}
+                                        {% if p.role == 'Staff' and not p.institution or p.role == 'Staff' and p.institution.approval_status != 'Approved' %}
+                                            <button type="button" class="btn btn-sm btn-outline-secondary disabled"
+                                                    title="Cannot approve: affiliated institution must be approved first." disabled>
+                                                <i class="bi bi-slash-circle me-1"></i>Approve
+                                            </button>
+                                        {% else %}
+                                            <form method="POST" action="{% url 'admin_user_approve' p.user.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-success" title="Approve Registration">
+                                                    <i class="bi bi-check-lg me-1"></i>Approve
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% if p.approval_status != 'Rejected' %}
+                                        <form method="POST" action="{% url 'admin_user_reject' p.user.id %}" class="d-inline ms-1">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Are you sure you want to reject the registration for {{ p.user.username }}?')"
+                                                    title="Reject Registration">
+                                                <i class="bi bi-x-lg me-1"></i>Reject
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                                {% if p.role == 'Staff' and not p.institution or p.role == 'Staff' and p.institution.approval_status != 'Approved' %}
+                                    <div class="mt-1" style="font-size: 0.72rem; color: #dc2626;">
+                                        <i class="bi bi-info-circle me-1"></i>Approve institution first
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
+                <h5 class="fw-bold mb-1">No Applications Found</h5>
+                <p class="small mb-0">There are currently no user applications matching status '{{ current_status }}'{% if current_role %} and role '{{ current_role }}'{% endif %}{% if search_query %} with query '{{ search_query }}'{% endif %}.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

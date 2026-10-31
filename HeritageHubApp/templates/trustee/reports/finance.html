@@ -1,0 +1,318 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Fund Utilization Report - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .report-nav {
+        background: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .report-nav .nav-link {
+        color: var(--hh-text);
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.5rem 1.1rem;
+        margin-right: 0.25rem;
+    }
+    .report-nav .nav-link:hover {
+        color: var(--hh-primary);
+        background: #fbfbf9;
+    }
+    .report-nav .nav-link.active {
+        background: var(--hh-gold);
+        color: #fff;
+    }
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .stat-card .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: var(--hh-text-muted);
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-pie-chart text-primary me-2"></i>
+                Fund Utilization & Financial Audit
+            </h3>
+            <p class="text-muted mb-0">
+                Statutory disbursement tracking, expenditure allocations, and liquidity reserves for <strong>{{ institution.name }}</strong>
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'trustee_reports_summary_pdf' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-download me-1"></i>Export PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Trustee Sub-Nav -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_event_list' %}">
+                    <i class="bi bi-calendar-event me-1"></i>Events & Festivals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_maintenance_list' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Works
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Reports & Analytics
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Reporting Sub-Nav -->
+    <nav class="report-nav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_donations' %}">
+                    <i class="bi bi-heart me-1"></i>Donation Trends
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_reports_finance' %}">
+                    <i class="bi bi-pie-chart me-1"></i>Fund Utilization
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_assets' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Valuation
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_maintenance' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Activities
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_summary' %}">
+                    <i class="bi bi-file-earmark-text me-1"></i>Consolidated Report
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Financial KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-success">₹{{ received_funds|floatformat:2 }}</div>
+                <div class="stat-label">Received Funds (Success)</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-danger">₹{{ utilized_funds|floatformat:2 }}</div>
+                <div class="stat-label">Utilized Funds (Approved)</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-primary">₹{{ available_funds|floatformat:2 }}</div>
+                <div class="stat-label">Available Liquid Funds</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-warning">₹{{ pending_expenses|floatformat:2 }}</div>
+                <div class="stat-label">Pending Clearances ({{ pending_count }})</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Utilization Rate Progress Bar -->
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-speedometer text-warning me-2"></i>Fund Utilization Rate
+            </h6>
+            <span class="fw-bold fs-5 text-dark">{{ utilization_pct }}%</span>
+        </div>
+        <div class="progress" style="height: 18px; border-radius: 9px;">
+            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ utilization_pct }}%;" aria-valuenow="{{ utilization_pct }}" aria-valuemin="0" aria-valuemax="100">
+                {% if utilization_pct > 5 %}{{ utilization_pct }}%{% endif %}
+            </div>
+        </div>
+        <div class="d-flex justify-content-between text-muted small mt-2">
+            <span>Disbursed: ₹{{ utilized_funds|floatformat:2 }}</span>
+            <span>Unutilized Reserve: ₹{{ available_funds|floatformat:2 }}</span>
+        </div>
+    </div>
+
+    <!-- Expense Category Breakdown -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-tags text-warning me-2"></i>Approved Category Breakdown
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if category_summary %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Category</th>
+                                        <th class="text-center">Count</th>
+                                        <th class="text-end">Total Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cat in category_summary %}
+                                        <tr>
+                                            <td class="fw-semibold text-dark">{{ cat.category }}</td>
+                                            <td class="text-center">{{ cat.count }}</td>
+                                            <td class="text-end fw-bold text-danger">₹{{ cat.total_amount|floatformat:2 }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-pie-chart display-5 text-muted opacity-50 mb-2"></i>
+                            <p class="mb-0">No approved expenditures logged in the system yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-journal-check text-warning me-2"></i>Expenditure Audit Ledger
+                    </h5>
+                    <span class="badge bg-light text-dark border">{{ expenses|length }} record(s)</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Date</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th class="text-end pe-3">Amount</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for e in expenses %}
+                                <tr>
+                                    <td class="ps-3 small text-muted">{{ e.expense_date|date:"d M Y" }}</td>
+                                    <td class="fw-semibold text-dark">{{ e.title }}</td>
+                                    <td class="small text-muted">{{ e.category }}</td>
+                                    <td class="text-end pe-3 fw-bold text-danger">₹{{ e.amount|floatformat:2 }}</td>
+                                    <td class="text-center">
+                                        <span class="badge {% if e.status == 'Approved' %}bg-success{% elif e.status == 'Pending' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                            {{ e.status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-2 text-muted opacity-50 mb-2"></i>
+                                        <p class="mb-0">No expense vouchers created yet.</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

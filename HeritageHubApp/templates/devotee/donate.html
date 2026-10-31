@@ -1,0 +1,190 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Make a Donation - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .devotee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .devotee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .devotee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .devotee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .donate-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .donate-card .card-header {
+        background: linear-gradient(135deg, var(--hh-primary) 0%, var(--hh-primary-dark) 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border: none;
+    }
+    .donate-card .card-body {
+        padding: 2rem 1.5rem;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--hh-text-muted);
+    }
+    .empty-state i {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        color: #d6d3d1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Sub-Navigation -->
+    <nav class="devotee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'devotee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'devotee_donate' %}">
+                    <i class="bi bi-heart me-1"></i>Donate
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'devotee_donation_history' %}">
+                    <i class="bi bi-clock-history me-1"></i>Donation History
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'devotee_profile' %}">
+                    <i class="bi bi-person me-1"></i>Profile
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    {% if institutions %}
+    <!-- Donation Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card donate-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-heart-fill me-2"></i>Make a Donation</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'devotee_donate' %}">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="institution" class="form-label fw-semibold">
+                                <i class="bi bi-building me-1"></i>Institution <span class="text-danger">*</span>
+                            </label>
+                            <select name="institution" id="institution" class="form-select" required>
+                                <option value="">— Select an Institution —</option>
+                                {% for inst in institutions %}
+                                <option value="{{ inst.id }}">{{ inst.name }} ({{ inst.get_institution_type_display }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="donor_name" class="form-label fw-semibold">
+                                        <i class="bi bi-person me-1"></i>Donor Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="donor_name" id="donor_name" class="form-control"
+                                           value="{{ request.user.get_full_name|default:request.user.username }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="donor_email" class="form-label fw-semibold">
+                                        <i class="bi bi-envelope me-1"></i>Email
+                                    </label>
+                                    <input type="email" name="donor_email" id="donor_email" class="form-control"
+                                           value="{{ request.user.email }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="amount" class="form-label fw-semibold">
+                                        <i class="bi bi-currency-rupee me-1"></i>Amount (₹) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" name="amount" id="amount" class="form-control"
+                                           min="1" step="0.01" placeholder="Enter donation amount" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="purpose" class="form-label fw-semibold">
+                                        <i class="bi bi-tag me-1"></i>Purpose <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="purpose" id="purpose" class="form-control"
+                                           placeholder="e.g., Temple renovation, Festival fund" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'devotee_dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-heritage-primary btn-lg">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Proceed to Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- No Approved Institutions -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="empty-state">
+                    <i class="bi bi-building-exclamation d-block"></i>
+                    <h5 class="fw-bold mb-2">No Approved Institutions Available</h5>
+                    <p class="text-muted mb-3">
+                        There are currently no approved institutions accepting donations.
+                        Please check back later once institutions have been registered and approved.
+                    </p>
+                    <a href="{% url 'devotee_dashboard' %}" class="btn btn-heritage-outline">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

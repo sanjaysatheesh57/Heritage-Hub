@@ -1,0 +1,261 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}{{ maintenance.title }} - Maintenance Dossier - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dossier-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        background: #fff;
+        overflow: hidden;
+    }
+    .dossier-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.5rem 2rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .cost-card {
+        border-radius: 10px;
+        padding: 1.25rem;
+        text-align: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+    .cost-card .cost-val {
+        font-size: 1.6rem;
+        font-weight: 700;
+    }
+    .spec-item {
+        margin-bottom: 0.75rem;
+    }
+    .spec-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: var(--hh-text-muted);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .spec-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--hh-dark);
+    }
+    .asset-linked-card {
+        background: #fafaf9;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 1.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Top Navigation Bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <a href="{% url 'trustee_maintenance_list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Maintenance Works
+        </a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'trustee_maintenance_edit' maintenance.id %}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-pencil me-1"></i>Edit Work
+            </a>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteMaintModal">
+                <i class="bi bi-trash me-1"></i>Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- Maintenance Dossier Card -->
+    <div class="dossier-card mb-4">
+        <div class="dossier-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h4 class="fw-bold mb-1 text-white">{{ maintenance.title }}</h4>
+                <div class="small text-light opacity-75">
+                    <i class="bi bi-bank2 me-1"></i>{{ maintenance.institution.name }}
+                </div>
+            </div>
+            <div>
+                {% if maintenance.status == 'Scheduled' %}
+                    <span class="badge bg-warning text-dark px-3 py-2"><i class="bi bi-clock me-1"></i>Scheduled</span>
+                {% elif maintenance.status == 'In Progress' %}
+                    <span class="badge bg-primary px-3 py-2"><i class="bi bi-play-circle me-1"></i>In Progress</span>
+                {% elif maintenance.status == 'Completed' %}
+                    <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle me-1"></i>Completed</span>
+                {% else %}
+                    <span class="badge bg-danger px-3 py-2"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="p-4 p-md-5">
+            <!-- Top Specifications Grid -->
+            <div class="bg-light p-4 rounded-3 mb-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                    <i class="bi bi-card-checklist me-2 text-warning"></i>Maintenance Specifications
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-md-4 spec-item">
+                        <div class="spec-label">Scheduled Date</div>
+                        <div class="spec-value">{{ maintenance.scheduled_date|date:"l, d F Y" }}</div>
+                    </div>
+                    <div class="col-md-4 spec-item">
+                        <div class="spec-label">Completion Date</div>
+                        <div class="spec-value">
+                            {% if maintenance.completion_date %}
+                                {{ maintenance.completion_date|date:"l, d F Y" }}
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary border">In Progress / Pending</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4 spec-item">
+                        <div class="spec-label">Current Status</div>
+                        <div class="spec-value">{{ maintenance.status }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Linked Asset Dossier Section -->
+            <div class="card border mb-4" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-box-seam me-2 text-warning"></i>Target Heritage Asset
+                    </h6>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    {% if maintenance.asset %}
+                        <div class="asset-linked-card">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-1">{{ maintenance.asset.name }}</h5>
+                                    <div class="text-muted small mb-2">
+                                        <span class="badge bg-secondary me-1">{{ maintenance.asset.asset_type }}</span>
+                                        <span>Category: <strong>{{ maintenance.asset.category }}</strong></span> &bull;
+                                        <span>Location: <strong>{{ maintenance.asset.location }}</strong></span>
+                                    </div>
+                                    <div class="d-flex gap-2 align-items-center small">
+                                        <span class="text-muted">Condition:</span>
+                                        {% if maintenance.asset.condition == 'Excellent' %}
+                                            <span class="badge bg-success">Excellent</span>
+                                        {% elif maintenance.asset.condition == 'Good' %}
+                                            <span class="badge bg-primary">Good</span>
+                                        {% elif maintenance.asset.condition == 'Needs Maintenance' %}
+                                            <span class="badge bg-warning text-dark">Needs Maintenance</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Damaged</span>
+                                        {% endif %}
+                                        <span class="text-muted ms-3">Valuation:</span>
+                                        <strong class="text-dark">₹{{ maintenance.asset.current_valuation|floatformat:2 }}</strong>
+                                    </div>
+                                </div>
+                                <div>
+                                    <a href="{% url 'trustee_asset_detail' maintenance.asset.id %}" class="btn btn-sm btn-heritage-outline">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>View Asset Dossier
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="p-3 text-muted">
+                            <i class="bi bi-building me-2 text-secondary"></i>
+                            This maintenance task applies to the <strong>General Institutional Premises</strong> (no single asset assigned).
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Financial Tracking Card -->
+            <div class="card border mb-4" style="border-radius: 12px;">
+                <div class="card-header bg-white py-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-cash-coin me-2 text-warning"></i>Cost Estimation & Tracking
+                    </h6>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="cost-card">
+                                <div class="text-muted small fw-semibold text-uppercase">Estimated Cost</div>
+                                <div class="cost-val text-primary mt-1">₹{{ maintenance.estimated_cost|floatformat:2 }}</div>
+                                <div class="small text-muted mt-1">Approved projection</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="cost-card">
+                                <div class="text-muted small fw-semibold text-uppercase">Actual Spent Cost</div>
+                                <div class="cost-val text-dark mt-1">₹{{ maintenance.actual_cost|floatformat:2 }}</div>
+                                <div class="small text-muted mt-1">Total disbursements</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="cost-card">
+                                <div class="text-muted small fw-semibold text-uppercase">Cost Variance</div>
+                                <div class="cost-val mt-1 {% if cost_variance > 0 %}text-danger{% elif cost_variance < 0 %}text-success{% else %}text-muted{% endif %}">
+                                    {% if cost_variance > 0 %}+{% endif %}₹{{ cost_variance|floatformat:2 }}
+                                </div>
+                                <div class="small mt-1 {% if cost_variance > 0 %}text-danger{% elif cost_variance < 0 %}text-success{% else %}text-muted{% endif %}">
+                                    {% if cost_variance > 0 %}Over Budget{% elif cost_variance < 0 %}Under Budget{% else %}On Budget{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description / Work Scope -->
+            <div class="p-4 border rounded-3">
+                <h6 class="fw-bold text-dark mb-2">
+                    <i class="bi bi-text-paragraph me-2 text-warning"></i>Conservation Scope & Methodological Notes
+                </h6>
+                <div class="text-muted lh-lg">
+                    {% if maintenance.description %}
+                        {{ maintenance.description|linebreaks }}
+                    {% else %}
+                        <span class="fst-italic text-secondary">No additional methodology or conservation notes recorded.</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal (POST + CSRF) -->
+    <div class="modal fade" id="deleteMaintModal" tabindex="-1" aria-labelledby="deleteMaintModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold" id="deleteMaintModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Maintenance Deletion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <i class="bi bi-tools text-danger fs-1 d-block mb-3"></i>
+                    <p class="mb-1">Are you sure you want to delete this maintenance record:</p>
+                    <h5 class="fw-bold text-dark mb-3">"{{ maintenance.title }}"</h5>
+                    <div class="alert alert-warning small text-start mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        This action is irreversible and will permanently delete this conservation record from the institution's audit logs.
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="POST" action="{% url 'trustee_maintenance_delete' maintenance.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Delete Maintenance Permanently
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

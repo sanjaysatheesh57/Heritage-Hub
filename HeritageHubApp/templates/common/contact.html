@@ -1,0 +1,117 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title %}Contact Us - HeritageHub Support & Inquiries{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="py-4 border-bottom" style="background-color: #f5f5f4;">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none" style="color: var(--hh-primary);">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Contact Us</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-1" style="color: var(--hh-dark);">Contact & Support</h2>
+        <p class="text-muted mb-0">Have inquiries about institution onboarding or platform governance? Connect with the HeritageHub team.</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- Contact Information -->
+        <div class="col-lg-5">
+            <div class="p-4 rounded-3 h-100 bg-white border">
+                <h4 class="fw-bold mb-4" style="color: var(--hh-dark);">HeritageHub Administration</h4>
+                
+                <div class="d-flex mb-4">
+                    <div class="module-icon-wrap icon-asset me-3 flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.3rem;">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Administrative Secretariat</h6>
+                        <p class="text-muted small mb-0">
+                            Department of Cultural Heritage & Religious Endowments<br>
+                            Heritage Information Center, Complex Block B<br>
+                            Bengaluru, Karnataka - 560001
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-4">
+                    <div class="module-icon-wrap icon-donation me-3 flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.3rem;">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Email Communication</h6>
+                        <p class="text-muted small mb-0">
+                            support@heritagehub.org<br>
+                            trustdesk@heritagehub.org
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-4">
+                    <div class="module-icon-wrap icon-event me-3 flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.3rem;">
+                        <i class="bi bi-telephone"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Helpline Hours</h6>
+                        <p class="text-muted small mb-0">
+                            +91 (080) 2345-6789<br>
+                            Monday &ndash; Saturday: 9:30 AM &ndash; 5:30 PM IST
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="alert alert-light border small text-muted mb-0">
+                    <i class="bi bi-info-circle text-primary me-2"></i>
+                    For official institution registration and onboarding verifications, please reach out with your trust deed and registration certificate details.
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form UI -->
+        <div class="col-lg-7">
+            <div class="p-4 p-md-5 rounded-3 bg-white border">
+                <h4 class="fw-bold mb-2" style="color: var(--hh-dark);">Send an Inquiry</h4>
+                <p class="text-muted small mb-4">Fill in the details below and our administrative team will attend to your request.</p>
+
+                <form method="POST" action="{% url 'contact' %}">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label small fw-semibold text-dark">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Ramesh Sharma" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="email" class="form-label small fw-semibold text-dark">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="subject" class="form-label small fw-semibold text-dark">Subject / Nature of Inquiry <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="subject" name="subject" placeholder="e.g. Trust Registration or Donation Inquiry" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="message" class="form-label small fw-semibold text-dark">Your Message <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="message" name="message" rows="5" placeholder="Please describe your question or inquiry in detail..." required></textarea>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-heritage-primary px-4 py-2">
+                                <i class="bi bi-send me-2"></i>Submit Message
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

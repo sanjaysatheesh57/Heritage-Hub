@@ -1,0 +1,116 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title %}Cash Donation #{{ donation.id }} — {{ institution.name }} — HeritageHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'staff_dashboard' %}">Staff Portal</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'staff_donation_list' %}">Cash Donations</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Record #{{ donation.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-warning text-dark border me-2">Cash Offering</span>
+                        <span class="text-muted font-monospace">{{ donation.transaction_id }}</span>
+                    </div>
+                    <div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                            <i class="bi bi-check-circle-fill me-1"></i>Recorded Successfully
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Amount Highlight -->
+                    <div class="text-center py-4 bg-light rounded-3 mb-4">
+                        <small class="text-muted text-uppercase fw-bold">Offering Amount Received</small>
+                        <h1 class="display-5 fw-bold text-success my-2">₹{{ donation.amount|floatformat:2 }}</h1>
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-building me-1"></i>{{ institution.name }}
+                        </p>
+                    </div>
+
+                    <!-- Details Table -->
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered align-middle mb-0">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light w-35 text-muted">Receipt Number</th>
+                                    <td>
+                                        {% if donation.receipt %}
+                                            <span class="fw-bold font-monospace text-primary">{{ donation.receipt.receipt_number }}</span>
+                                            <a href="{% url 'staff_donation_receipt' donation.id %}" class="btn btn-sm btn-outline-primary ms-2 py-0">
+                                                <i class="bi bi-printer me-1"></i>Print Receipt
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-muted">Internal Cash Reference</th>
+                                    <td class="font-monospace fw-semibold">{{ donation.transaction_id }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-muted">Donor Name</th>
+                                    <td class="fw-bold text-dark">{{ donation.donor_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-muted">Donor Email</th>
+                                    <td>
+                                        {% if donation.donor_email %}
+                                            <a href="mailto:{{ donation.donor_email }}">{{ donation.donor_email }}</a>
+                                        {% else %}
+                                            <span class="text-muted font-italic">Not provided</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-muted">Purpose of Donation</th>
+                                    <td><span class="badge bg-light text-dark border">{{ donation.purpose }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-muted">Payment Channel</th>
+                                    <td>
+                                        <span class="badge bg-warning text-dark border">
+                                            <i class="bi bi-cash me-1"></i>Cash (Physical Offering)
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-muted">Recorded Timestamp</th>
+                                    <td>{{ donation.donation_date|date:"l, d F Y, h:i:s A" }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top">
+                        <a href="{% url 'staff_donation_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Donations List
+                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'staff_donation_receipt' donation.id %}" class="btn btn-primary fw-semibold" style="background-color: var(--hh-primary, #9a3412); border-color: var(--hh-primary, #9a3412);">
+                                <i class="bi bi-printer me-1"></i>View Official Receipt
+                            </a>
+                            <a href="{% url 'staff_donation_add' %}" class="btn btn-warning fw-semibold text-dark">
+                                <i class="bi bi-plus-lg me-1"></i>Record Another
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

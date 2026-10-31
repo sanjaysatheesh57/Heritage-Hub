@@ -1,0 +1,286 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Asset Valuation Report - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .report-nav {
+        background: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .report-nav .nav-link {
+        color: var(--hh-text);
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.5rem 1.1rem;
+        margin-right: 0.25rem;
+    }
+    .report-nav .nav-link:hover {
+        color: var(--hh-primary);
+        background: #fbfbf9;
+    }
+    .report-nav .nav-link.active {
+        background: var(--hh-gold);
+        color: #fff;
+    }
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .stat-card .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: var(--hh-text-muted);
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-box-seam text-warning me-2"></i>
+                Asset Valuation & Condition Audit
+            </h3>
+            <p class="text-muted mb-0">
+                Institutional movable & immovable heritage inventory, physical condition metrics, and total appraisal for <strong>{{ institution.name }}</strong>
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'trustee_reports_summary_pdf' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-download me-1"></i>Export PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Trustee Sub-Nav -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_event_list' %}">
+                    <i class="bi bi-calendar-event me-1"></i>Events & Festivals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_maintenance_list' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Works
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Reports & Analytics
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Reporting Sub-Nav -->
+    <nav class="report-nav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_donations' %}">
+                    <i class="bi bi-heart me-1"></i>Donation Trends
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_finance' %}">
+                    <i class="bi bi-pie-chart me-1"></i>Fund Utilization
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_reports_assets' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Valuation
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_maintenance' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Activities
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_summary' %}">
+                    <i class="bi bi-file-earmark-text me-1"></i>Consolidated Report
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Primary Asset Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-dark">{{ total_assets }}</div>
+                <div class="stat-label">Total Registered Assets</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-primary">{{ movable_count }}</div>
+                <div class="stat-label">Movable Assets (₹{{ movable_valuation|floatformat:2 }})</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-info">{{ immovable_count }}</div>
+                <div class="stat-label">Immovable Assets (₹{{ immovable_valuation|floatformat:2 }})</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-success">₹{{ total_valuation|floatformat:2 }}</div>
+                <div class="stat-label">Total Current Valuation</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Condition Health Distribution -->
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+        <h5 class="fw-bold mb-3 text-dark">
+            <i class="bi bi-activity text-warning me-2"></i>Physical Condition & Conservation Health Distribution
+        </h5>
+        <div class="row g-3">
+            {% for c in condition_summary %}
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="p-3 border rounded-3 bg-light text-center">
+                        <span class="badge {% if c.condition == 'Excellent' %}bg-success{% elif c.condition == 'Good' %}bg-primary{% elif c.condition == 'Needs Maintenance' %}bg-warning text-dark{% else %}bg-danger{% endif %} mb-2 px-3 py-1">
+                            {{ c.condition }}
+                        </span>
+                        <div class="fw-bold fs-4 text-dark">{{ c.count }}</div>
+                        <div class="small text-muted">Valuation: ₹{{ c.valuation|floatformat:2 }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Asset Inventory Table -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-list-check text-warning me-2"></i>Institutional Asset Valuation Registry
+            </h5>
+            <span class="badge bg-light text-dark border">{{ assets|length }} asset(s)</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Asset Name</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Condition</th>
+                        <th>Location</th>
+                        <th class="text-end pe-4">Current Valuation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in assets %}
+                        <tr>
+                            <td class="ps-4">
+                                <a href="{% url 'trustee_asset_detail' a.id %}" class="fw-bold text-dark text-decoration-none">
+                                    {{ a.name }}
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge {% if a.asset_type == 'Movable' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                    {{ a.asset_type }}
+                                </span>
+                            </td>
+                            <td class="text-muted">{{ a.category }}</td>
+                            <td>
+                                <span class="badge {% if a.condition == 'Excellent' %}bg-success{% elif a.condition == 'Good' %}bg-info text-dark{% elif a.condition == 'Needs Maintenance' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                    {{ a.condition }}
+                                </span>
+                            </td>
+                            <td class="text-muted small">{{ a.location }}</td>
+                            <td class="text-end pe-4 fw-bold text-dark">₹{{ a.current_valuation|floatformat:2 }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-2 text-muted opacity-50 mb-2"></i>
+                                <p class="mb-0">No assets registered under this institution.</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

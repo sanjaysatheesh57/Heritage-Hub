@@ -1,0 +1,416 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Consolidated Report - {{ institution.name }} - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .report-nav {
+        background: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .report-nav .nav-link {
+        color: var(--hh-text);
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.5rem 1.1rem;
+        margin-right: 0.25rem;
+    }
+    .report-nav .nav-link:hover {
+        color: var(--hh-primary);
+        background: #fbfbf9;
+    }
+    .report-nav .nav-link.active {
+        background: var(--hh-gold);
+        color: #fff;
+    }
+    .report-dossier {
+        background: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 14px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+        padding: 2.5rem;
+    }
+    .dossier-header {
+        border-bottom: 3px solid var(--hh-gold);
+        padding-bottom: 1.25rem;
+        margin-bottom: 2rem;
+    }
+    .section-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--hh-primary);
+        border-left: 4px solid var(--hh-gold);
+        padding-left: 0.75rem;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    .table-summary th {
+        background-color: #fcfbfa;
+        font-weight: 600;
+        color: var(--hh-dark);
+        width: 35%;
+    }
+    
+    @media print {
+        body {
+            background-color: #fff !important;
+        }
+        .hh-navbar, .trustee-subnav, .report-nav, .no-print {
+            display: none !important;
+        }
+        .report-dossier {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        .container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header / Actions -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 no-print">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-file-earmark-text text-warning me-2"></i>
+                Consolidated Institutional Report
+            </h3>
+            <p class="text-muted mb-0">
+                Official governance, financial, and conservation summary for <strong>{{ institution.name }}</strong>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i>Print Report
+            </button>
+            <a href="{% url 'trustee_reports_summary_pdf' %}" class="btn btn-heritage-gold shadow-sm">
+                <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Trustee Sub-Nav -->
+    <nav class="trustee-subnav no-print">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_event_list' %}">
+                    <i class="bi bi-calendar-event me-1"></i>Events & Festivals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_maintenance_list' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Works
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Reports & Analytics
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Reporting Sub-Nav -->
+    <nav class="report-nav no-print">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_donations' %}">
+                    <i class="bi bi-heart me-1"></i>Donation Trends
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_finance' %}">
+                    <i class="bi bi-pie-chart me-1"></i>Fund Utilization
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_assets' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Valuation
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_maintenance' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Activities
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_reports_summary' %}">
+                    <i class="bi bi-file-earmark-text me-1"></i>Consolidated Report
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Formal Printable Dossier -->
+    <div class="report-dossier">
+        <!-- Header / Letterhead -->
+        <div class="dossier-header d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+                <div class="text-uppercase fw-bold text-muted small letter-spacing-1">
+                    HeritageHub — Cultural Heritage Asset & Trust MIS
+                </div>
+                <h2 class="fw-bold text-dark mt-1 mb-1">{{ institution.name }}</h2>
+                <div class="text-muted small">
+                    {{ institution.get_institution_type_display }} | Reg. Date: {{ institution.registered_date|date:"d M Y" }}
+                </div>
+            </div>
+            <div class="text-md-end mt-2 mt-md-0">
+                <span class="badge bg-success px-3 py-2 fs-6">
+                    <i class="bi bi-patch-check me-1"></i>Status: {{ institution.approval_status }}
+                </span>
+                <div class="text-muted small mt-1">
+                    Generated: {{ generated_date|date:"d M Y, h:i A" }}
+                </div>
+                <div class="text-muted small">
+                    Prepared by Trustee: <strong>{{ generated_by }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. INSTITUTION INFORMATION -->
+        <div class="section-title">1. Institution Profile & Administration</div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-summary mb-4">
+                <tbody>
+                    <tr>
+                        <th>Authorized Representative</th>
+                        <td>{{ institution.authorized_representative }}</td>
+                    </tr>
+                    <tr>
+                        <th>Official Address</th>
+                        <td>{{ institution.address }}</td>
+                    </tr>
+                    <tr>
+                        <th>Contact Number</th>
+                        <td>{{ institution.contact_number }}</td>
+                    </tr>
+                    <tr>
+                        <th>Official Email</th>
+                        <td>{{ institution.email }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2. FINANCIAL SUMMARY -->
+        <div class="section-title">2. Financial Audit & Fund Utilization</div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-summary mb-4">
+                <tbody>
+                    <tr>
+                        <th>Total Received Donations</th>
+                        <td class="fw-bold text-success">
+                            ₹{{ received_funds|floatformat:2 }}
+                            <span class="text-muted fw-normal ms-2">({{ donations_count }} verified transactions)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Approved Expenditures</th>
+                        <td class="fw-bold text-danger">
+                            ₹{{ approved_expenses|floatformat:2 }}
+                            <span class="text-muted fw-normal ms-2">(Authorized statutory disbursements)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Net Available Funds</th>
+                        <td class="fw-bold text-primary fs-6">
+                            ₹{{ available_funds|floatformat:2 }}
+                            <span class="text-muted fw-normal ms-2">(Liquid treasury balance)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Pending Vouchers</th>
+                        <td class="fw-bold text-warning">
+                            ₹{{ pending_expenses|floatformat:2 }}
+                            <span class="text-muted fw-normal ms-2">(Reserved awaiting approval)</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 3. ASSET SUMMARY -->
+        <div class="section-title">3. Cultural Heritage Asset Valuation</div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-summary mb-4">
+                <tbody>
+                    <tr>
+                        <th>Total Registered Assets</th>
+                        <td class="fw-bold text-dark">{{ total_assets }} assets registered</td>
+                    </tr>
+                    <tr>
+                        <th>Movable Heritage Assets</th>
+                        <td>{{ movable_count }} items (Idols, utensils, sacred artifacts)</td>
+                    </tr>
+                    <tr>
+                        <th>Immovable Heritage Assets</th>
+                        <td>{{ immovable_count }} properties (Mandapams, sanctums, land holdings)</td>
+                    </tr>
+                    <tr>
+                        <th>Total Asset Valuation</th>
+                        <td class="fw-bold text-dark fs-6">₹{{ total_valuation|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 4. EVENT SUMMARY -->
+        <div class="section-title">4. Cultural Events & Festivals</div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-summary mb-4">
+                <tbody>
+                    <tr>
+                        <th>Total Scheduled Events</th>
+                        <td>{{ total_events }} recorded festivals and poojas</td>
+                    </tr>
+                    <tr>
+                        <th>Event Status Breakdown</th>
+                        <td>
+                            <span class="badge bg-warning text-dark me-1">Scheduled: {{ scheduled_events }}</span>
+                            <span class="badge bg-info text-dark me-1">Ongoing: {{ ongoing_events }}</span>
+                            <span class="badge bg-success me-1">Completed: {{ completed_events }}</span>
+                            <span class="badge bg-secondary">Cancelled: {{ cancelled_events }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Budget vs Actual Cost</th>
+                        <td>
+                            Estimated: ₹{{ event_estimated_cost|floatformat:2 }} |
+                            <span class="fw-bold text-danger">Actual Expenditure: ₹{{ event_actual_cost|floatformat:2 }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Recorded Events</th>
+                        <td>
+                            {% for ev in recent_events %}
+                                <div class="small mb-1">• <strong>{{ ev.name }}</strong> ({{ ev.date|date:"d M Y" }}) — <span class="badge bg-light text-dark border">{{ ev.status }}</span></div>
+                            {% empty %}
+                                <span class="text-muted small">No events recorded</span>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 5. MAINTENANCE SUMMARY -->
+        <div class="section-title">5. Routine Maintenance & Conservation Works</div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-summary mb-4">
+                <tbody>
+                    <tr>
+                        <th>Total Conservation Works</th>
+                        <td>{{ total_maintenance }} work orders logged</td>
+                    </tr>
+                    <tr>
+                        <th>Work Progress Breakdown</th>
+                        <td>
+                            <span class="badge bg-warning text-dark me-1">Scheduled: {{ scheduled_maint }}</span>
+                            <span class="badge bg-info text-dark me-1">In Progress: {{ in_progress_maint }}</span>
+                            <span class="badge bg-success me-1">Completed: {{ completed_maint }}</span>
+                            <span class="badge bg-secondary">Cancelled: {{ cancelled_maint }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Conservation Expenditure</th>
+                        <td>
+                            Estimated: ₹{{ maint_estimated_cost|floatformat:2 }} |
+                            <span class="fw-bold text-danger">Actual Spent: ₹{{ maint_actual_cost|floatformat:2 }}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Recent Works</th>
+                        <td>
+                            {% for mw in recent_maintenance %}
+                                <div class="small mb-1">• <strong>{{ mw.title }}</strong> ({{ mw.scheduled_date|date:"d M Y" }}) — <span class="badge bg-light text-dark border">{{ mw.status }}</span></div>
+                            {% empty %}
+                                <span class="text-muted small">No maintenance works recorded</span>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer / Certification -->
+        <div class="border-top pt-3 mt-4 text-muted small text-center">
+            <p class="mb-1">
+                This document is a certified institutional governance report generated automatically by <strong>HeritageHub MIS</strong>.
+            </p>
+            <p class="mb-0 text-muted">
+                Authoritative Database: MySQL (heritagehub) | Verification Timestamp: {{ generated_date|date:"Y-m-d H:i:s" }} UTC
+            </p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

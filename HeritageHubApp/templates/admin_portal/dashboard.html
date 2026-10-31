@@ -1,0 +1,464 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}System Administration Dashboard - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-hero {
+        background: linear-gradient(135deg, #1c1917 0%, #292524 50%, #44403c 100%);
+        border-radius: 14px;
+        padding: 2rem;
+        color: #fff;
+        margin-bottom: 2rem;
+        border-left: 5px solid var(--hh-gold);
+    }
+    .admin-kpi-card {
+        border: 1px solid var(--hh-border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        background: #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        height: 100%;
+    }
+    .admin-kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+    .kpi-icon-wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-bottom: 0.75rem;
+    }
+    .kpi-val {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--hh-dark);
+        line-height: 1.2;
+    }
+    .kpi-lbl {
+        font-size: 0.8rem;
+        color: var(--hh-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    .pending-alert-card {
+        border-left: 4px solid var(--hh-gold);
+        background: #fffbeb;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Admin Top Banner -->
+    <div class="admin-hero d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-warning text-dark px-2 py-1 fw-bold">
+                    <i class="bi bi-shield-lock-fill me-1"></i>ADMIN PORTAL
+                </span>
+                <span class="text-white-50 small">System-Wide Operational Oversight</span>
+            </div>
+            <h2 class="fw-bold mb-1 text-white">Central Administration & Monitoring</h2>
+            <p class="text-light text-opacity-75 mb-0">
+                Welcome, <strong>{{ request.user.username }}</strong>. Manage institutional verifications, user registrations, and cross-institutional governance.
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'admin_user_approval_list' %}" class="btn btn-warning fw-semibold shadow-sm">
+                <i class="bi bi-person-check-fill me-1"></i>Review Users ({{ pending_users_count }})
+            </a>
+            <a href="{% url 'admin_institution_list' %}?status=Pending" class="btn btn-outline-light">
+                <i class="bi bi-building-check me-1"></i>Review Institutions ({{ pending_inst_count }})
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Pending Action Alert Banner if any pending items exist -->
+    {% if pending_users_count > 0 or pending_inst_count > 0 %}
+    <div class="pending-alert-card d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-exclamation-diamond-fill text-warning fs-3"></i>
+            <div>
+                <strong class="text-dark">Action Required: Pending Registrations Awaiting Verification</strong>
+                <div class="small text-muted">
+                    {% if pending_users_count > 0 %}
+                        <span class="badge bg-warning text-dark me-1">{{ pending_users_count }} User Application{{ pending_users_count|pluralize }}</span>
+                    {% endif %}
+                    {% if pending_inst_count > 0 %}
+                        <span class="badge bg-danger text-white me-1">{{ pending_inst_count }} Institution Application{{ pending_inst_count|pluralize }}</span>
+                    {% endif %}
+                    requiring administrative review and verification.
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            {% if pending_users_count > 0 %}
+                <a href="{% url 'admin_user_approval_list' %}" class="btn btn-sm btn-dark">
+                    <i class="bi bi-people me-1"></i>Process Users
+                </a>
+            {% endif %}
+            {% if pending_inst_count > 0 %}
+                <a href="{% url 'admin_institution_list' %}?status=Pending" class="btn btn-sm btn-outline-dark">
+                    <i class="bi bi-bank me-1"></i>Process Institutions
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Macro KPI Cards Row 1: Core Entities -->
+    <div class="row g-3 mb-4">
+        <!-- Institutions -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="admin-kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="kpi-lbl">Institutions</div>
+                        <div class="kpi-val">{{ total_institutions }}</div>
+                    </div>
+                    <div class="kpi-icon-wrap" style="background: #eff6ff; color: #1d4ed8;">
+                        <i class="bi bi-building"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top small text-muted d-flex justify-content-between">
+                    <span><span class="text-success fw-semibold">{{ approved_inst_count }}</span> active</span>
+                    <span><span class="text-warning fw-semibold">{{ pending_inst_count }}</span> pending</span>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'admin_institution_list' %}" class="small text-decoration-none fw-semibold text-primary">
+                        Manage Institutions <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="admin-kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="kpi-lbl">Total Users</div>
+                        <div class="kpi-val">{{ total_users }}</div>
+                    </div>
+                    <div class="kpi-icon-wrap" style="background: #fdf2f8; color: #be185d;">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top small text-muted d-flex justify-content-between">
+                    <span>{{ trustee_count }} Trustees</span>
+                    <span>{{ staff_count }} Staff</span>
+                    <span>{{ devotee_count }} Devotees</span>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'admin_user_list' %}" class="small text-decoration-none fw-semibold text-primary">
+                        View Directory <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donations -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="admin-kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="kpi-lbl">Donations Inflow</div>
+                        <div class="kpi-val">₹{{ total_donations_sum|floatformat:2 }}</div>
+                    </div>
+                    <div class="kpi-icon-wrap" style="background: #f0fdf4; color: #15803d;">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top small text-muted d-flex justify-content-between">
+                    <span>{{ successful_donations_count }} successful receipts</span>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'admin_donation_list' %}" class="small text-decoration-none fw-semibold text-primary">
+                        Financial Audit <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assets -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="admin-kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="kpi-lbl">Cultural Assets</div>
+                        <div class="kpi-val">{{ total_assets_count }}</div>
+                    </div>
+                    <div class="kpi-icon-wrap" style="background: #fffbeb; color: #b45309;">
+                        <i class="bi bi-gem"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top small text-muted d-flex justify-content-between">
+                    <span>Valuation: ₹{{ total_assets_valuation|floatformat:2 }}</span>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'admin_asset_list' %}" class="small text-decoration-none fw-semibold text-primary">
+                        Asset Registry <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Macro KPI Cards Row 2: Operational Monitoring -->
+    <div class="row g-3 mb-4">
+        <!-- Expenses -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="admin-kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="kpi-lbl">Approved Expenses</div>
+                        <div class="kpi-val">₹{{ total_expenses_sum|floatformat:2 }}</div>
+                    </div>
+                    <div class="kpi-icon-wrap" style="background: #fef2f2; color: #b91c1c;">
+                        <i class="bi bi-receipt-cutoff"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top small text-muted">
+                    <span>{{ expenses_count }} vouchers recorded</span>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'admin_expense_list' %}" class="small text-decoration-none fw-semibold text-primary">
+                        Expenses Oversight <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="admin-kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="kpi-lbl">Conservation Works</div>
+                        <div class="kpi-val">{{ total_maintenance_count }}</div>
+                    </div>
+                    <div class="kpi-icon-wrap" style="background: #f8fafc; color: #475569;">
+                        <i class="bi bi-tools"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top small text-muted d-flex justify-content-between">
+                    <span><strong class="text-primary">{{ active_maintenance_count }}</strong> active</span>
+                    <span><strong class="text-success">{{ completed_maintenance_count }}</strong> completed</span>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'admin_maintenance_list' %}" class="small text-decoration-none fw-semibold text-primary">
+                        Maintenance Monitor <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="admin-kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="kpi-lbl">Heritage Events</div>
+                        <div class="kpi-val">{{ total_events_count }}</div>
+                    </div>
+                    <div class="kpi-icon-wrap" style="background: #faf5ff; color: #7e22ce;">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top small text-muted d-flex justify-content-between">
+                    <span>{{ upcoming_events_count }} upcoming / ongoing</span>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'admin_event_list' %}" class="small text-decoration-none fw-semibold text-primary">
+                        Events Monitor <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Audit Trail -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="admin-kpi-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="kpi-lbl">System Audit Trail</div>
+                        <div class="kpi-val">{{ total_audit_logs_count }}</div>
+                    </div>
+                    <div class="kpi-icon-wrap" style="background: #f1f5f9; color: #334155;">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top small text-muted">
+                    <span>Audit log entries</span>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'admin_audit_log_list' %}" class="small text-decoration-none fw-semibold text-primary">
+                        Audit Log Viewer <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation Bar -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body py-3">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="small fw-bold text-uppercase text-muted">
+                    <i class="bi bi-compass me-1"></i>Executive Modules
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'admin_user_approval_list' %}" class="btn btn-sm btn-outline-warning text-dark fw-semibold">
+                        <i class="bi bi-person-check me-1"></i>User Approvals
+                    </a>
+                    <a href="{% url 'admin_user_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-people me-1"></i>All Users
+                    </a>
+                    <a href="{% url 'admin_institution_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-building me-1"></i>Institutions
+                    </a>
+                    <a href="{% url 'admin_asset_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-gem me-1"></i>Assets
+                    </a>
+                    <a href="{% url 'admin_donation_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-cash me-1"></i>Donations
+                    </a>
+                    <a href="{% url 'admin_expense_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-wallet2 me-1"></i>Expenses
+                    </a>
+                    <a href="{% url 'admin_event_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-calendar me-1"></i>Events
+                    </a>
+                    <a href="{% url 'admin_maintenance_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-tools me-1"></i>Maintenance
+                    </a>
+                    <a href="{% url 'admin_reports_overview' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-graph-up me-1"></i>System Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Two-column Section: Pending Approvals Queue & Recent Audit Activity -->
+    <div class="row g-4">
+        <!-- Left: Pending Trustee & Staff Registrations -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-person-exclamation text-warning me-2"></i>Pending User Registrations
+                    </h6>
+                    <a href="{% url 'admin_user_approval_list' %}" class="small text-decoration-none fw-semibold">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if pending_users %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role Requested</th>
+                                    <th>Institution</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for u in pending_users %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold small text-dark">{{ u.user.username }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">{{ u.user.email|default:"No email" }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if u.role == 'Trustee' %}badge-role-trustee{% elif u.role == 'Staff' %}badge-role-staff{% else %}bg-secondary{% endif %}">
+                                            {{ u.role }}
+                                        </span>
+                                    </td>
+                                    <td class="small text-muted">
+                                        {{ u.institution.name|default:"None assigned" }}
+                                    </td>
+                                    <td class="text-end">
+                                        <form method="POST" action="{% url 'admin_user_approve' u.user.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-success py-0 px-2" title="Approve">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{% url 'admin_user_reject' u.user.id %}" class="d-inline ms-1">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger py-0 px-2" onclick="return confirm('Reject registration for {{ u.user.username }}?')" title="Reject">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-check2-circle fs-2 text-success d-block mb-2"></i>
+                        <div class="small fw-semibold">No pending user registrations</div>
+                        <div class="small text-muted">All Trustee and Staff accounts are reviewed.</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Recent System Audit Activity -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-clock-history text-primary me-2"></i>Recent System Activity
+                    </h6>
+                    <a href="{% url 'admin_audit_log_list' %}" class="small text-decoration-none fw-semibold">View All Logs</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_audit_logs %}
+                    <ul class="list-group list-group-flush small">
+                        {% for log in recent_audit_logs %}
+                        <li class="list-group-item px-3 py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold text-dark">{{ log.action }}</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">{{ log.timestamp|date:"d M, H:i" }}</span>
+                            </div>
+                            <div class="text-muted text-truncate" style="font-size: 0.8rem;">
+                                {{ log.description }}
+                            </div>
+                            <div class="text-muted" style="font-size: 0.725rem;">
+                                User: <strong>{{ log.user.username|default:"System" }}</strong>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-2 text-secondary d-block mb-2"></i>
+                        <div class="small fw-semibold">No recent activity recorded</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

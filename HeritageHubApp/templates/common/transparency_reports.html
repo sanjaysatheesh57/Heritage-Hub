@@ -1,0 +1,287 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Public Transparency Disclosures - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transparency-hero {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        border-radius: 16px;
+        padding: 2.5rem 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 4px solid var(--hh-gold);
+    }
+    .kpi-stat-card {
+        border: none;
+        border-radius: 12px;
+        padding: 1.5rem;
+        background: #fff;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+        border: 1px solid var(--hh-border);
+        text-align: center;
+        height: 100%;
+    }
+    .kpi-stat-card .val {
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .kpi-stat-card .lbl {
+        font-size: 0.85rem;
+        color: var(--hh-text-muted);
+        margin-top: 0.35rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    .disclosure-card {
+        border: 1px solid var(--hh-border);
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Hero Banner -->
+    <div class="transparency-hero">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-warning text-dark px-3 py-1 mb-2 fw-semibold">
+                    <i class="bi bi-shield-check me-1"></i>Public Governance Portal
+                </span>
+                <h2 class="fw-bold mb-2">Institutional Transparency & Accountability</h2>
+                <p class="text-light opacity-75 mb-0">
+                    HeritageHub empowers public trust through open statutory disclosures of community donations, authorized disbursements, and cultural asset conservation.
+                </p>
+            </div>
+            <div class="col-lg-4 mt-3 mt-lg-0 text-lg-end">
+                <div class="bg-white bg-opacity-10 p-3 rounded-3 text-light text-start text-lg-end">
+                    <div class="small opacity-75">Statutory Standard</div>
+                    <div class="fw-bold fs-6">Section 80G & Public Trust Compliance</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if approved_institutions %}
+        <!-- Institution Selector -->
+        <div class="card shadow-sm border-0 rounded-4 p-3 mb-4 bg-light">
+            <form method="GET" action="{% url 'public_transparency_reports' %}" class="row g-2 align-items-center">
+                <div class="col-12 col-md-auto">
+                    <label for="institutionSelect" class="col-form-label fw-bold text-dark">
+                        <i class="bi bi-bank2 text-warning me-1"></i>Select Institution:
+                    </label>
+                </div>
+                <div class="col-12 col-md-6">
+                    <select id="institutionSelect" name="institution" class="form-select" onchange="this.form.submit()">
+                        {% for inst in approved_institutions %}
+                            <option value="{{ inst.id }}" {% if selected_institution and selected_institution.id == inst.id %}selected{% endif %}>
+                                {{ inst.name }} ({{ inst.get_institution_type_display }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-auto">
+                    <button type="submit" class="btn btn-heritage-gold">
+                        <i class="bi bi-filter me-1"></i>View Disclosure
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if selected_institution %}
+            <!-- Selected Institution Details -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                <div>
+                    <h4 class="fw-bold text-dark mb-1">
+                        {{ selected_institution.name }}
+                    </h4>
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-geo-alt me-1 text-danger"></i>{{ selected_institution.address }} |
+                        <i class="bi bi-person-badge ms-2 me-1 text-primary"></i>Rep: {{ selected_institution.authorized_representative }}
+                    </p>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    <span class="badge bg-success px-3 py-2">
+                        <i class="bi bi-patch-check-fill me-1"></i>Government Approved Institution
+                    </span>
+                </div>
+            </div>
+
+            <!-- 1. FINANCIAL TRANSPARENCY -->
+            <div class="disclosure-card">
+                <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-cash-coin text-success me-2"></i>1. Financial Transparency & Fund Allocations
+                </h5>
+                <p class="text-muted small mb-4">
+                    Public financial accounts reflecting verified community donations received and authorized expenditures approved by the institutional board.
+                </p>
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="kpi-stat-card">
+                            <div class="val text-success">₹{{ total_donations|floatformat:2 }}</div>
+                            <div class="lbl">Total Received Donations</div>
+                            <div class="small text-muted mt-1">{{ donations_count }} verified offerings</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="kpi-stat-card">
+                            <div class="val text-primary">₹{{ online_donations|floatformat:2 }}</div>
+                            <div class="lbl">Online Digital Donations</div>
+                            <div class="small text-muted mt-1">E-Hundi & Card payments</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="kpi-stat-card">
+                            <div class="val text-warning">₹{{ cash_donations|floatformat:2 }}</div>
+                            <div class="lbl">Cash Offerings</div>
+                            <div class="small text-muted mt-1">Official physical receipts</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="kpi-stat-card">
+                            <div class="val text-danger">₹{{ approved_expenses|floatformat:2 }}</div>
+                            <div class="lbl">Approved Expenditures</div>
+                            <div class="small text-muted mt-1">Board-authorized disbursements</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info border-0 rounded-3 d-flex align-items-center justify-content-between flex-wrap mb-0">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-wallet-fill text-primary fs-4 me-3"></i>
+                        <div>
+                            <div class="fw-bold text-dark">Current Net Available Institutional Balance</div>
+                            <div class="small text-muted">Liquid reserves available for religious ceremonies, festival organization, and temple maintenance.</div>
+                        </div>
+                    </div>
+                    <div class="fw-bold fs-4 text-primary mt-2 mt-md-0">
+                        ₹{{ available_funds|floatformat:2 }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. ASSET TRANSPARENCY -->
+            <div class="disclosure-card">
+                <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-box-seam text-warning me-2"></i>2. Cultural Heritage Asset Registry & Valuation
+                </h5>
+                <p class="text-muted small mb-4">
+                    Audited inventory of registered temple movable artifacts and immovable properties under management.
+                </p>
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-6">
+                        <div class="kpi-stat-card text-start p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="lbl mb-1">Registered Heritage Assets</div>
+                                    <div class="val text-dark">{{ total_assets }}</div>
+                                </div>
+                                <i class="bi bi-gem fs-1 text-warning"></i>
+                            </div>
+                            <p class="small text-muted mt-2 mb-0">
+                                Verified by the Board of Trustees and filed with the State Cultural Heritage Department.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="kpi-stat-card text-start p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="lbl mb-1">Total Inspected Appraisal</div>
+                                    <div class="val text-dark">₹{{ total_valuation|floatformat:2 }}</div>
+                                </div>
+                                <i class="bi bi-award fs-1 text-success"></i>
+                            </div>
+                            <p class="small text-muted mt-2 mb-0">
+                                Combined current valuation based on certified metallurgical, archaeological, and property assessments.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-dark mb-2">Physical Condition Health Overview</h6>
+                <div class="row g-2">
+                    {% for c in condition_summary %}
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 border rounded-3 bg-light text-center">
+                                <span class="badge {% if c.condition == 'Excellent' %}bg-success{% elif c.condition == 'Good' %}bg-primary{% elif c.condition == 'Needs Maintenance' %}bg-warning text-dark{% else %}bg-danger{% endif %} mb-1">
+                                    {{ c.condition }}
+                                </span>
+                                <div class="fw-bold fs-5 text-dark">{{ c.count }} item(s)</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 3. MAINTENANCE & CONSERVATION TRANSPARENCY -->
+            <div class="disclosure-card">
+                <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="bi bi-tools text-info me-2"></i>3. Routine Maintenance & Conservation Transparency
+                </h5>
+                <p class="text-muted small mb-4">
+                    Tracking public accountability for structural upkeep, chemical conservation treatments, and routine repairs.
+                </p>
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="kpi-stat-card">
+                            <div class="val text-dark">{{ total_maintenance }}</div>
+                            <div class="lbl">Total Conservation Works</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="kpi-stat-card">
+                            <div class="val text-success">{{ completed_maintenance }}</div>
+                            <div class="lbl">Completed Works</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="kpi-stat-card">
+                            <div class="val text-warning">{{ scheduled_maintenance }}</div>
+                            <div class="lbl">Scheduled Works</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="kpi-stat-card">
+                            <div class="val text-danger">₹{{ maintenance_expenditure|floatformat:2 }}</div>
+                            <div class="lbl">Total Maintenance Cost</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
+
+    {% else %}
+        <div class="card shadow-sm border-0 rounded-4 text-center p-5">
+            <i class="bi bi-building-exclamation text-muted display-4 mb-3"></i>
+            <h4 class="fw-bold text-dark">No Approved Institutions Found</h4>
+            <p class="text-muted mb-0">
+                Public transparency reports will be published as soon as registered institutions receive statutory government accreditation.
+            </p>
+        </div>
+    {% endif %}
+
+    <!-- Privacy & Statutory Notice -->
+    <div class="card bg-light border-0 rounded-4 p-4 text-muted small">
+        <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-shield-lock-fill text-secondary me-2 fs-5"></i>
+            <span class="fw-bold text-dark">Data Privacy & Protection Guarantee</span>
+        </div>
+        <p class="mb-0">
+            HeritageHub adheres to statutory donor privacy mandates. In accordance with data governance protocols, individual devotee email addresses, telephone numbers, banking credentials, internal administrative notes, and audit system logs are strictly excluded from public reporting.
+        </p>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}System-Wide Governance Reports - HeritageHub Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb & Header -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">System Reports</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h3 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-graph-up text-primary me-2"></i>System-Wide Governance Reports
+            </h3>
+            <p class="text-muted mb-0">Cross-institutional comparative analytics, financial performance, asset valuation, and conservation expenditures.</p>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-sm btn-outline-dark">
+                <i class="bi bi-printer me-1"></i>Print Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Executive Overview KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3 text-center">
+                <div class="small text-muted text-uppercase fw-semibold">Active Institutions</div>
+                <div class="fs-4 fw-bold text-dark">{{ total_approved_institutions }}</div>
+                <div class="small text-muted">Approved & Active</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3 text-center">
+                <div class="small text-muted text-uppercase fw-semibold">Total Asset Valuation</div>
+                <div class="fs-4 fw-bold text-success">₹{{ total_valuation|floatformat:2 }}</div>
+                <div class="small text-muted">{{ total_assets }} Cultural Assets</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3 text-center">
+                <div class="small text-muted text-uppercase fw-semibold">Total Offerings Inflow</div>
+                <div class="fs-4 fw-bold text-primary">₹{{ total_donations_collected|floatformat:2 }}</div>
+                <div class="small text-muted">Successful Devotee Donations</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm p-3 rounded-3 text-center">
+                <div class="small text-muted text-uppercase fw-semibold">Approved Spend & Maint.</div>
+                <div class="fs-4 fw-bold text-danger">₹{{ total_expenses_approved|add:total_maintenance_spend|floatformat:2 }}</div>
+                <div class="small text-muted">Vouchers & Conservation</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Institutional Comparative Breakdown Table -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-table me-2"></i>Institutional Comparative Breakdown
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            {% if institution_summaries %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Institution</th>
+                            <th>Type</th>
+                            <th class="text-center">Assets</th>
+                            <th class="text-end">Asset Valuation</th>
+                            <th class="text-end">Donations Collected</th>
+                            <th class="text-end">Approved Expenses</th>
+                            <th class="text-center">Maint. Works</th>
+                            <th class="text-end">Maint. Spend</th>
+                            <th class="text-end">Net Surplus / (Deficit)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in institution_summaries %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'admin_institution_detail' row.institution.id %}" class="fw-bold text-dark text-decoration-none">
+                                    {{ row.institution.name }}
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border small">{{ row.institution.get_institution_type_display }}</span>
+                            </td>
+                            <td class="text-center fw-semibold">{{ row.asset_count }}</td>
+                            <td class="text-end small">₹{{ row.total_valuation|floatformat:2 }}</td>
+                            <td class="text-end fw-semibold text-success small">₹{{ row.donations_total|floatformat:2 }}</td>
+                            <td class="text-end small text-danger">₹{{ row.expenses_total|floatformat:2 }}</td>
+                            <td class="text-center">{{ row.maintenance_count }}</td>
+                            <td class="text-end small">₹{{ row.maintenance_spend|floatformat:2 }}</td>
+                            <td class="text-end fw-bold {% if row.net_balance >= 0 %}text-success{% else %}text-danger{% endif %} small">
+                                ₹{{ row.net_balance|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-bank fs-1 d-block mb-3 text-secondary"></i>
+                <h5 class="fw-bold mb-1">No Active Institutions</h5>
+                <p class="small mb-0">No approved institutions are currently active in the system.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

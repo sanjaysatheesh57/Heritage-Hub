@@ -1,0 +1,245 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Donations Registry - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .donations-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+        background: #fff;
+    }
+    .donations-card .card-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .stat-card-sm {
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 1rem;
+        background: #fff;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">
+                <i class="bi bi-heart text-warning me-2"></i>
+                Donation Records & Contributions
+            </h3>
+            <p class="text-muted mb-0">Custodial donation ledger for <strong>{{ institution.name }}</strong></p>
+        </div>
+        <div>
+            <a href="{% url 'trustee_finance_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Finance Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Stat Pills Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card-sm">
+                <span class="text-muted small d-block text-uppercase">Total Received</span>
+                <span class="fs-4 fw-bold text-success">₹{{ total_received|floatformat:2 }}</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card-sm">
+                <span class="text-muted small d-block text-uppercase">Online (Success)</span>
+                <span class="fs-4 fw-bold text-info">{{ count_online }}</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card-sm">
+                <span class="text-muted small d-block text-uppercase">Cash (Success)</span>
+                <span class="fs-4 fw-bold text-secondary">{{ count_cash }}</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card-sm">
+                <span class="text-muted small d-block text-uppercase">Pending / Failed</span>
+                <span class="fs-4 fw-bold {% if count_pending or count_failed %}text-warning{% else %}text-muted{% endif %}">
+                    {{ count_pending|add:count_failed }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Buttons & Table Card -->
+    <div class="card donations-card">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h5 class="mb-0 text-white"><i class="bi bi-journal-text me-2"></i>Institutional Donations</h5>
+            <div class="btn-group btn-group-sm" role="group">
+                <a href="{% url 'trustee_donation_list' %}" class="btn btn-outline-light {% if current_filter == 'all' %}active{% endif %}">
+                    All ({{ count_all }})
+                </a>
+                <a href="?status=Success" class="btn btn-outline-light {% if current_filter == 'Success' %}active{% endif %}">
+                    Successful ({{ count_success }})
+                </a>
+                <a href="?type=Online" class="btn btn-outline-light {% if current_filter == 'Online' %}active{% endif %}">
+                    Online
+                </a>
+                <a href="?type=Cash" class="btn btn-outline-light {% if current_filter == 'Cash' %}active{% endif %}">
+                    Cash
+                </a>
+                <a href="?status=Pending" class="btn btn-outline-warning {% if current_filter == 'Pending' %}active{% endif %}">
+                    Pending ({{ count_pending }})
+                </a>
+                <a href="?status=Failed" class="btn btn-outline-danger {% if current_filter == 'Failed' %}active{% endif %}">
+                    Failed ({{ count_failed }})
+                </a>
+            </div>
+        </div>
+
+        {% if donations %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Donor Name</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            <th>Receipt</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in donations %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ d.donor_name }}</div>
+                                    {% if d.donor_email %}
+                                        <small class="text-muted">{{ d.donor_email }}</small>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-dark">₹{{ d.amount|floatformat:2 }}</td>
+                                <td>
+                                    {% if d.donation_type == 'Online' %}
+                                        <span class="badge bg-info text-dark"><i class="bi bi-globe me-1"></i>Online</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="bi bi-cash me-1"></i>Cash</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small">{{ d.purpose }}</td>
+                                <td>
+                                    {% if d.payment_status == 'Success' %}
+                                        <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Success</span>
+                                    {% elif d.payment_status == 'Pending' %}
+                                        <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-clock me-1"></i>Pending</span>
+                                    {% else %}
+                                        <span class="badge bg-danger px-2 py-1"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small font-monospace text-muted">{{ d.transaction_id|default:"—" }}</td>
+                                <td class="small text-muted">{{ d.donation_date|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if d.receipt %}
+                                        <a href="{% url 'trustee_receipt_view' d.id %}" class="badge bg-light text-primary border text-decoration-none p-1">
+                                            <i class="bi bi-file-earmark-check me-1"></i>{{ d.receipt.receipt_number }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted small fst-italic">None</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'trustee_donation_detail' d.id %}" class="btn btn-sm btn-outline-primary">
+                                        Details
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                <h5 class="fw-bold text-dark">No Donation Records Found</h5>
+                <p class="small text-muted col-md-6 mx-auto mb-0">
+                    {% if current_filter != 'all' %}
+                        No donations match the selected filter. Try switching to "All".
+                    {% else %}
+                        When devotees contribute online or cash receipts are submitted for {{ institution.name }}, they will appear here.
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Institution Review & Approval - HeritageHub Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .admin-card .card-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .stat-box {
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 1.25rem;
+        background: #fff;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .stat-box .count {
+        font-size: 1.85rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-box .label {
+        font-size: 0.85rem;
+        color: var(--hh-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Institutions Review</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">
+                <i class="bi bi-shield-check text-warning me-2"></i>
+                Institutions Review & Governance
+            </h3>
+            <p class="text-muted mb-0">Review pending registrations, inspect dossiers, and manage heritage institution approval status.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-sm btn-outline-dark">
+                <i class="bi bi-speedometer2 me-1"></i>Admin Dashboard
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <div class="count text-warning">{{ pending_count }}</div>
+                <div class="label">Pending Review</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <div class="count text-success">{{ approved_count }}</div>
+                <div class="label">Approved & Active</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <div class="count text-danger">{{ rejected_count }}</div>
+                <div class="label">Rejected</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <div class="count text-dark">{{ total_count }}</div>
+                <div class="label">Total Applications</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card admin-card">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h5 class="mb-0 text-white"><i class="bi bi-list-check me-2"></i>Registered Institutions</h5>
+            <div class="btn-group btn-group-sm" role="group">
+                <a href="?status=all" class="btn btn-outline-light {% if current_filter == 'all' %}active{% endif %}">All ({{ total_count }})</a>
+                <a href="?status=Pending" class="btn btn-outline-warning {% if current_filter == 'Pending' %}active{% endif %}">Pending ({{ pending_count }})</a>
+                <a href="?status=Approved" class="btn btn-outline-success {% if current_filter == 'Approved' %}active{% endif %}">Approved ({{ approved_count }})</a>
+                <a href="?status=Rejected" class="btn btn-outline-danger {% if current_filter == 'Rejected' %}active{% endif %}">Rejected ({{ rejected_count }})</a>
+            </div>
+        </div>
+
+        {% if institutions %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Institution</th>
+                        <th>Representative & Contact</th>
+                        <th>Address</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                        <th class="text-center" style="min-width: 220px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inst in institutions %}
+                    <tr>
+                        <td class="text-muted small fw-semibold">{{ inst.id }}</td>
+                        <td>
+                            <a href="{% url 'admin_institution_detail' inst.id %}" class="fw-bold text-dark text-decoration-none">
+                                {{ inst.name }}
+                            </a>
+                            <div>
+                                <span class="badge bg-light text-dark border small">{{ inst.get_institution_type_display }}</span>
+                                {% if inst.pan %}
+                                    <span class="small text-muted ms-1">PAN: {{ inst.pan }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small fw-semibold">{{ inst.authorized_representative }}</div>
+                            <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ inst.contact_number }}</div>
+                            <div class="small text-muted"><i class="bi bi-envelope me-1"></i>{{ inst.email }}</div>
+                        </td>
+                        <td class="small text-muted" style="max-width: 250px;">
+                            {{ inst.address|truncatewords:12 }}
+                            {% if inst.registration_certificate %}
+                                <div>
+                                    <a href="{{ inst.registration_certificate.url }}" target="_blank" class="badge bg-info text-dark text-decoration-none mt-1">
+                                        <i class="bi bi-file-earmark-arrow-down me-1"></i>Doc
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="small text-muted">
+                            {{ inst.registered_date|date:"d M Y" }}<br>
+                            <small>{{ inst.registered_date|date:"h:i A" }}</small>
+                        </td>
+                        <td>
+                            {% if inst.approval_status == 'Approved' %}
+                                <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                            {% elif inst.approval_status == 'Pending' %}
+                                <span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                            {% else %}
+                                <span class="badge bg-danger px-2 py-1"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'admin_institution_detail' inst.id %}" class="btn btn-sm btn-outline-dark" title="View Dossier">
+                                    <i class="bi bi-eye me-1"></i>Dossier
+                                </a>
+                                {% if inst.approval_status != 'Approved' %}
+                                    <form method="POST" action="{% url 'admin_institution_approve' inst.id %}" class="d-inline ms-1">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success" title="Approve this institution">
+                                            <i class="bi bi-check-circle me-1"></i>Approve
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                {% if inst.approval_status != 'Rejected' %}
+                                    <form method="POST" action="{% url 'admin_institution_reject' inst.id %}" class="d-inline ms-1">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to reject {{ inst.name }}?')" title="Reject this institution">
+                                            <i class="bi bi-x-circle me-1"></i>Reject
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-body text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
+            <h5 class="fw-bold mb-1">No Institutions Found</h5>
+            <p class="small mb-0">There are currently no institutions matching the filter '{{ current_filter }}'.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

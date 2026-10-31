@@ -1,0 +1,315 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}{{ asset.name }} - Asset Dossier - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .dossier-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+        background: #fff;
+    }
+    .dossier-header {
+        background: linear-gradient(135deg, var(--hh-dark) 0%, #292524 100%);
+        color: #fff;
+        padding: 1.5rem 2rem;
+        border-bottom: 3px solid var(--hh-gold);
+    }
+    .asset-photo-container {
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid var(--hh-border);
+        background: #fbfbf9;
+        text-align: center;
+        max-height: 420px;
+    }
+    .asset-photo-img {
+        max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+    }
+    .spec-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f5f5f4;
+    }
+    .spec-item:last-child {
+        border-bottom: none;
+    }
+    .spec-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--hh-text-muted);
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    .spec-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--hh-text);
+    }
+    .valuation-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 1px solid #f59e0b;
+        border-radius: 10px;
+        padding: 1.25rem;
+        text-align: center;
+        margin-top: 1rem;
+    }
+    .maintenance-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        overflow: hidden;
+        background: #fff;
+        margin-top: 2rem;
+    }
+    .maintenance-card .card-header {
+        background: #292524;
+        color: #fff;
+        padding: 1rem 1.5rem;
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Top Navigation Row -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: var(--hh-dark);">
+                <i class="bi bi-journal-bookmark text-warning me-2"></i>
+                Heritage Asset Dossier
+            </h3>
+            <p class="text-muted mb-0">Record #{{ asset.id }} &bull; {{ asset.institution.name }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'trustee_asset_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>All Assets
+            </a>
+            <a href="{% url 'trustee_asset_edit' asset.id %}" class="btn btn-heritage-outline">
+                <i class="bi bi-pencil me-1"></i>Edit Asset
+            </a>
+            <a href="{% url 'trustee_asset_delete' asset.id %}" class="btn btn-outline-danger">
+                <i class="bi bi-trash me-1"></i>Delete
+            </a>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Asset Dossier Card -->
+    <div class="dossier-card mb-4">
+        <!-- Dossier Header -->
+        <div class="dossier-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h4 class="fw-bold mb-1 text-white">{{ asset.name }}</h4>
+                <div class="small text-light opacity-75">
+                    {{ asset.category }} &bull; {{ asset.institution.name }}
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                {% if asset.asset_type == 'Movable' %}
+                    <span class="badge bg-info text-dark px-3 py-2"><i class="bi bi-box me-1"></i>Movable Asset</span>
+                {% else %}
+                    <span class="badge bg-secondary px-3 py-2"><i class="bi bi-bank me-1"></i>Immovable Heritage</span>
+                {% endif %}
+
+                {% if asset.condition == 'Excellent' %}
+                    <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle me-1"></i>Excellent</span>
+                {% elif asset.condition == 'Good' %}
+                    <span class="badge bg-primary px-3 py-2"><i class="bi bi-hand-thumbs-up me-1"></i>Good</span>
+                {% elif asset.condition == 'Needs Maintenance' %}
+                    <span class="badge bg-warning text-dark px-3 py-2"><i class="bi bi-tools me-1"></i>Needs Maintenance</span>
+                {% else %}
+                    <span class="badge bg-danger px-3 py-2"><i class="bi bi-exclamation-triangle me-1"></i>Damaged</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Dossier Body -->
+        <div class="p-4 p-md-5">
+            <div class="row g-4">
+                <!-- Left: Photograph & Valuation -->
+                <div class="col-lg-5">
+                    <div class="asset-photo-container p-2">
+                        {% if asset.photograph %}
+                            <img src="{{ asset.photograph.url }}" alt="{{ asset.name }}" class="asset-photo-img rounded">
+                        {% else %}
+                            <div class="py-5 text-muted">
+                                <i class="bi bi-image fs-1 d-block mb-2 text-secondary"></i>
+                                <span class="small">No photograph uploaded for this asset</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Valuation Box -->
+                    <div class="valuation-box">
+                        <div class="text-uppercase small fw-bold text-muted" style="letter-spacing: 1px;">Current Estimated Valuation</div>
+                        <div class="fs-2 fw-bold text-dark mt-1">₹{{ asset.current_valuation|floatformat:2 }}</div>
+                        <div class="small text-muted mt-1">Recorded for statutory heritage audit</div>
+                    </div>
+                </div>
+
+                <!-- Right: Asset Specifications & Details -->
+                <div class="col-lg-7">
+                    <div class="bg-light p-4 rounded-3 mb-4">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-card-checklist me-2 text-warning"></i>Dossier Specifications
+                        </h6>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Asset Classification</div>
+                                <div class="spec-value">{{ asset.asset_type }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Heritage Category</div>
+                                <div class="spec-value">{{ asset.category }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Location on Premises</div>
+                                <div class="spec-value">{{ asset.location }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Acquisition / Consecration Date</div>
+                                <div class="spec-value">{{ asset.date_acquired|date:"d M Y"|default:"Ancient / Historical Record" }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Physical Condition</div>
+                                <div class="spec-value">{{ asset.get_condition_display|default:asset.condition }}</div>
+                            </div>
+                            <div class="col-sm-6 spec-item">
+                                <div class="spec-label">Custodial Institution</div>
+                                <div class="spec-value">{{ asset.institution.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="p-3 border rounded-3">
+                        <h6 class="fw-bold text-dark mb-2">
+                            <i class="bi bi-text-paragraph me-2 text-warning"></i>Historical Description & Inscriptions
+                        </h6>
+                        <div class="text-muted small lh-lg">
+                            {% if asset.description %}
+                                {{ asset.description|linebreaks }}
+                            {% else %}
+                                <span class="fst-italic">No additional historical description or epigraphical notes recorded.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance History Section (Integrated with existing Maintenance records) -->
+    <div class="card maintenance-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-white">
+                <i class="bi bi-tools me-2 text-warning"></i>Maintenance & Conservation History
+            </h6>
+            <span class="badge bg-light text-dark">{{ maintenance_history|length }} Record{{ maintenance_history|length|pluralize }}</span>
+        </div>
+
+        {% if maintenance_history %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Activity / Title</th>
+                            <th>Scheduled Date</th>
+                            <th>Completion Date</th>
+                            <th>Estimated Cost</th>
+                            <th>Actual Cost</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in maintenance_history %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold text-dark">{{ record.title }}</div>
+                                {% if record.description %}
+                                    <small class="text-muted">{{ record.description|truncatewords:10 }}</small>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ record.scheduled_date|date:"d M Y" }}</td>
+                            <td class="small text-muted">{{ record.completion_date|date:"d M Y"|default:"—" }}</td>
+                            <td class="small">₹{{ record.estimated_cost|floatformat:2 }}</td>
+                            <td class="small fw-semibold">₹{{ record.actual_cost|floatformat:2 }}</td>
+                            <td>
+                                {% if record.status == 'Completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif record.status == 'In Progress' %}
+                                    <span class="badge bg-info text-dark">In Progress</span>
+                                {% elif record.status == 'Scheduled' %}
+                                    <span class="badge bg-warning text-dark">Scheduled</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="bi bi-clipboard-check fs-2 text-secondary d-block mb-2"></i>
+                <h6 class="fw-semibold text-dark mb-1">No Maintenance Records Found</h6>
+                <p class="small mb-0">There are no conservation or maintenance logs currently associated with this asset.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

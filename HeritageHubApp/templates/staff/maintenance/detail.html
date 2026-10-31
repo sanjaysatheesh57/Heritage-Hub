@@ -1,0 +1,185 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title %}{{ maintenance.title }} — Maintenance Details — HeritageHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'staff_dashboard' %}">Staff Portal</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'staff_maintenance_list' %}">Maintenance</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Work #{{ maintenance.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Main Details Card -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div>
+                        <span class="badge bg-secondary me-2">Work #{{ maintenance.id }}</span>
+                        <h4 class="fw-bold d-inline align-middle mb-0 text-dark">{{ maintenance.title }}</h4>
+                    </div>
+                    <div>
+                        {% if maintenance.status == 'Completed' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6">
+                                <i class="bi bi-check-circle-fill me-1"></i>Completed
+                            </span>
+                        {% elif maintenance.status == 'In Progress' %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 fs-6">
+                                <i class="bi bi-hourglass-split me-1"></i>In Progress
+                            </span>
+                        {% elif maintenance.status == 'Scheduled' %}
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2 fs-6">
+                                <i class="bi bi-calendar-check me-1"></i>Scheduled
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 fs-6">Cancelled</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Scope & Description -->
+                    <h6 class="text-uppercase text-muted fw-bold small mb-2">Scope of Work & Details</h6>
+                    <div class="bg-light p-3 rounded-3 mb-4 text-dark">
+                        {% if maintenance.description %}
+                            <p class="mb-0" style="white-space: pre-line;">{{ maintenance.description }}</p>
+                        {% else %}
+                            <span class="text-muted fst-italic">No detailed description provided.</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Financial & Timeline Grid -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <div class="card border bg-light h-100 p-3">
+                                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Estimated Budget</small>
+                                <h4 class="fw-bold text-dark my-1">₹{{ maintenance.estimated_cost|floatformat:2 }}</h4>
+                                <small class="text-muted">Approved projected cost</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card border bg-light h-100 p-3">
+                                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Actual Expenditure</small>
+                                <h4 class="fw-bold text-success my-1">₹{{ maintenance.actual_cost|floatformat:2 }}</h4>
+                                <small class="text-muted">Logged conservation expenditure</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Specifications Table -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-4">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light w-35 text-secondary">Institution</th>
+                                    <td class="fw-semibold text-dark">{{ institution.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-secondary">Scheduled Execution Date</th>
+                                    <td class="fw-semibold text-dark">
+                                        <i class="bi bi-calendar-event me-2 text-primary"></i>{{ maintenance.scheduled_date|date:"l, d F Y" }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-secondary">Actual Completion Date</th>
+                                    <td>
+                                        {% if maintenance.completion_date %}
+                                            <span class="text-success fw-semibold">
+                                                <i class="bi bi-check-circle me-1"></i>{{ maintenance.completion_date|date:"l, d F Y" }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                                <i class="bi bi-clock me-1"></i>Pending Work Completion
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light text-secondary">Current Operational Status</th>
+                                    <td>
+                                        <strong>{{ maintenance.status }}</strong>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Actions Toolbar -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'staff_maintenance_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Maintenance Ledger
+                        </a>
+                        <a href="{% url 'staff_maintenance_edit' maintenance.id %}" class="btn btn-primary fw-semibold" style="background-color: var(--hh-primary, #9a3412); border-color: var(--hh-primary, #9a3412);">
+                            <i class="bi bi-pencil-square me-1"></i>Update Progress / Costs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linked Asset Sidebar Card -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-box-seam me-2 text-primary" style="color: var(--hh-primary, #9a3412) !important;"></i>Linked Cultural Asset
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        {% if maintenance.asset.photograph %}
+                            <div class="flex-shrink-0">
+                                <img src="{{ maintenance.asset.photograph.url }}" alt="{{ maintenance.asset.name }}" class="rounded-3 shadow-sm" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid var(--hh-border);">
+                            </div>
+                        {% else %}
+                            <div class="p-3 rounded-3 flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background-color: #fef3c7; color: #9a3412;">
+                                <i class="bi bi-gem fs-3"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="fw-bold mb-0 text-dark">{{ maintenance.asset.name }}</h5>
+                            <span class="badge bg-light text-dark border">{{ maintenance.asset.get_asset_type_display }}</span>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled small mb-0">
+                        <li class="mb-2">
+                            <span class="text-muted d-block">Physical Condition:</span>
+                            <span class="badge {% if maintenance.asset.condition == 'Excellent' or maintenance.asset.condition == 'Good' %}bg-success-subtle text-success border border-success-subtle{% else %}bg-warning-subtle text-warning border border-warning-subtle{% endif %}">
+                                {{ maintenance.asset.condition }}
+                            </span>
+                        </li>
+                        <li class="mb-2">
+                            <span class="text-muted d-block">Storage / Sanctum Location:</span>
+                            <strong class="text-dark">{{ maintenance.asset.location|default:"Main Sanctum" }}</strong>
+                        </li>
+                        {% if maintenance.asset.material %}
+                        <li class="mb-2">
+                            <span class="text-muted d-block">Primary Material:</span>
+                            <span class="text-dark">{{ maintenance.asset.material }}</span>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <span class="text-muted d-block">Asset Description:</span>
+                            <span class="text-muted">{{ maintenance.asset.description|truncatechars:100 }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 bg-light">
+                <div class="card-body p-3">
+                    <small class="text-muted">
+                        <i class="bi bi-lock me-1"></i>
+                        Staff records are restricted to record entry and operational updates. Record deletion and disposal workflows are reserved for authorized temple trustees.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

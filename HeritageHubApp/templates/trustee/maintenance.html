@@ -1,0 +1,298 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Asset Maintenance & Conservation - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+    .stat-card .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: var(--hh-text-muted);
+        margin-top: 0.25rem;
+    }
+    .maint-table-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        background: #fff;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header Area -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-tools text-warning me-2"></i>Asset Maintenance & Conservation
+            </h3>
+            <p class="text-muted mb-0">
+                Track restoration, scheduled maintenance, and conservation activities for <strong>{{ institution.name }}</strong>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'trustee_maintenance_add' %}" class="btn btn-heritage-primary">
+                <i class="bi bi-plus-circle me-1"></i>Schedule Maintenance
+            </a>
+            <a href="{% url 'trustee_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Sub-Navigation -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_event_list' %}">
+                    <i class="bi bi-calendar-event me-1"></i>Events & Festivals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_maintenance_list' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Works
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Reports & Analytics
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Metrics Cards Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-dark">{{ count_all }}</div>
+                <div class="stat-label">Total Works</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-warning">{{ count_scheduled }}</div>
+                <div class="stat-label">Scheduled</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-primary">{{ count_in_progress }}</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-success">{{ count_completed }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-secondary">₹{{ total_estimated|floatformat:0 }}</div>
+                <div class="stat-label">Est. Cost</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="stat-card">
+                <div class="stat-value text-info">₹{{ total_actual|floatformat:0 }}</div>
+                <div class="stat-label">Actual Spent</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Pills / Tabs -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <ul class="nav nav-pills gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'all' %}active bg-dark{% else %}text-dark{% endif %}" href="{% url 'trustee_maintenance_list' %}">
+                            All Records <span class="badge {% if current_filter == 'all' %}bg-secondary{% else %}bg-light text-dark{% endif %} ms-1">{{ count_all }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'Scheduled' %}active bg-warning text-dark{% else %}text-dark{% endif %}" href="{% url 'trustee_maintenance_list' %}?status=Scheduled">
+                            Scheduled <span class="badge {% if current_filter == 'Scheduled' %}bg-dark text-warning{% else %}bg-light text-dark{% endif %} ms-1">{{ count_scheduled }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'In Progress' %}active bg-primary{% else %}text-dark{% endif %}" href="{% url 'trustee_maintenance_list' %}?status=In Progress">
+                            In Progress <span class="badge {% if current_filter == 'In Progress' %}bg-light text-primary{% else %}bg-light text-dark{% endif %} ms-1">{{ count_in_progress }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'Completed' %}active bg-success{% else %}text-dark{% endif %}" href="{% url 'trustee_maintenance_list' %}?status=Completed">
+                            Completed <span class="badge {% if current_filter == 'Completed' %}bg-light text-success{% else %}bg-light text-dark{% endif %} ms-1">{{ count_completed }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if current_filter == 'Cancelled' %}active bg-danger{% else %}text-dark{% endif %}" href="{% url 'trustee_maintenance_list' %}?status=Cancelled">
+                            Cancelled <span class="badge {% if current_filter == 'Cancelled' %}bg-light text-danger{% else %}bg-light text-dark{% endif %} ms-1">{{ count_cancelled }}</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <span class="text-muted small">
+                    Showing <strong>{{ maintenance_records|length }}</strong> record{{ maintenance_records|length|pluralize }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance Records Table -->
+    {% if maintenance_records %}
+        <div class="maint-table-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Activity / Work Title</th>
+                            <th>Linked Heritage Asset</th>
+                            <th>Scheduled Date</th>
+                            <th>Completion Date</th>
+                            <th>Estimated Cost</th>
+                            <th>Actual Cost</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in maintenance_records %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark">{{ record.title }}</div>
+                                {% if record.description %}
+                                    <small class="text-muted">{{ record.description|truncatewords:8 }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.asset %}
+                                    <a href="{% url 'trustee_asset_detail' record.asset.id %}" class="fw-semibold text-primary text-decoration-none">
+                                        <i class="bi bi-box-seam me-1"></i>{{ record.asset.name }}
+                                    </a>
+                                    <div><small class="text-muted">{{ record.asset.category }}</small></div>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary border">
+                                        <i class="bi bi-building me-1"></i>General Premises
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ record.scheduled_date|date:"d M Y" }}</td>
+                            <td class="small text-muted">{{ record.completion_date|date:"d M Y"|default:"—" }}</td>
+                            <td class="small">₹{{ record.estimated_cost|floatformat:2 }}</td>
+                            <td class="small fw-semibold text-dark">₹{{ record.actual_cost|floatformat:2 }}</td>
+                            <td>
+                                {% if record.status == 'Completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif record.status == 'In Progress' %}
+                                    <span class="badge bg-primary">In Progress</span>
+                                {% elif record.status == 'Scheduled' %}
+                                    <span class="badge bg-warning text-dark">Scheduled</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'trustee_maintenance_detail' record.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'trustee_maintenance_edit' record.id %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-tools fs-1 text-secondary d-block mb-3"></i>
+                <h5 class="fw-bold text-dark mb-1">No Maintenance Records Found</h5>
+                <p class="small mb-3">
+                    {% if current_filter == 'all' %}
+                        No conservation or maintenance works have been logged for {{ institution.name }} yet.
+                    {% else %}
+                        No records found matching status filter "<strong>{{ current_filter }}</strong>".
+                    {% endif %}
+                </p>
+                <a href="{% url 'trustee_maintenance_add' %}" class="btn btn-heritage-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Schedule First Maintenance Work
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

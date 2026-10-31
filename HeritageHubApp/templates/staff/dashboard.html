@@ -1,0 +1,254 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title %}Staff Dashboard — {{ institution.name }} — HeritageHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Institutional Header -->
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary text-white rounded-3 p-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background-color: var(--hh-primary, #9a3412) !important;">
+                        <i class="bi bi-person-badge fs-3"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-secondary mb-1">Staff / Authorized Personnel Portal</span>
+                        <h2 class="fw-bold mb-0 text-dark">{{ institution.name }}</h2>
+                        <small class="text-muted">
+                            <i class="bi bi-geo-alt me-1"></i>{{ institution.address|truncatechars:60 }} &bull;
+                            <i class="bi bi-tag me-1"></i>{{ institution.get_institution_type_display }}
+                        </small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{% url 'staff_donation_add' %}" class="btn btn-warning fw-semibold text-dark shadow-sm">
+                        <i class="bi bi-cash-coin me-1"></i>Record Cash Donation
+                    </a>
+                    <a href="{% url 'staff_maintenance_add' %}" class="btn btn-primary fw-semibold shadow-sm" style="background-color: var(--hh-primary, #9a3412); border-color: var(--hh-primary, #9a3412);">
+                        <i class="bi bi-tools me-1"></i>Record Maintenance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Sub-Navigation -->
+    <ul class="nav nav-pills mb-4 border-bottom pb-2">
+        <li class="nav-item">
+            <a class="nav-link active fw-semibold" href="{% url 'staff_dashboard' %}">
+                <i class="bi bi-speedometer2 me-1"></i>Dashboard Overview
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark fw-semibold" href="{% url 'staff_donation_list' %}">
+                <i class="bi bi-cash-stack me-1"></i>Cash Donations
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark fw-semibold" href="{% url 'staff_maintenance_list' %}">
+                <i class="bi bi-tools me-1"></i>Maintenance Works
+            </a>
+        </li>
+    </ul>
+
+    <!-- Operational Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-6">
+            <div class="card shadow-sm border-0 h-100 border-start border-4 border-warning">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Cash Offerings Ingested</span>
+                            <h3 class="fw-bold text-dark mt-1 mb-1">{{ total_cash_donations_count }} Record{{ total_cash_donations_count|pluralize }}</h3>
+                            <div class="text-success fw-semibold">
+                                <i class="bi bi-currency-rupee me-1"></i>₹{{ total_cash_donations_amount|floatformat:2 }} Total Cash Collected
+                            </div>
+                        </div>
+                        <div class="bg-warning-subtle text-warning p-3 rounded-circle">
+                            <i class="bi bi-cash-stack fs-4"></i>
+                        </div>
+                    </div>
+                    <hr class="my-3 opacity-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Physical counter donations recorded</small>
+                        <a href="{% url 'staff_donation_list' %}" class="btn btn-sm btn-outline-warning text-dark fw-semibold">
+                            View All <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-6">
+            <div class="card shadow-sm border-0 h-100 border-start border-4 border-primary" style="border-left-color: var(--hh-primary, #9a3412) !important;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Maintenance Works Logged</span>
+                            <h3 class="fw-bold text-dark mt-1 mb-1">{{ total_maintenance_count }} Work{{ total_maintenance_count|pluralize }}</h3>
+                            <div class="text-primary fw-semibold" style="color: var(--hh-primary, #9a3412) !important;">
+                                <i class="bi bi-shield-check me-1"></i>Conservation & Upkeep Entries
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-circle" style="background-color: #fef3c7; color: #9a3412;">
+                            <i class="bi bi-tools fs-4"></i>
+                        </div>
+                    </div>
+                    <hr class="my-3 opacity-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Asset upkeep and routine maintenance</small>
+                        <a href="{% url 'staff_maintenance_list' %}" class="btn btn-sm btn-outline-primary fw-semibold" style="color: var(--hh-primary, #9a3412); border-color: var(--hh-primary, #9a3412);">
+                            View All <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operational Data Tables -->
+    <div class="row g-4">
+        <!-- Recent Cash Donations -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-cash-coin me-2 text-warning"></i>Recent Cash Donations
+                    </h5>
+                    <a href="{% url 'staff_donation_add' %}" class="btn btn-sm btn-warning text-dark fw-semibold">
+                        <i class="bi bi-plus-lg me-1"></i>Record Cash
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_donations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Date</th>
+                                    <th>Donor</th>
+                                    <th>Amount</th>
+                                    <th>Receipt</th>
+                                    <th class="pe-3 text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for donation in recent_donations %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <small class="text-muted">{{ donation.donation_date|date:"d M Y" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold text-dark">{{ donation.donor_name }}</span>
+                                        <br><small class="text-muted">{{ donation.purpose|truncatechars:25 }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-success">₹{{ donation.amount|floatformat:2 }}</span>
+                                    </td>
+                                    <td>
+                                        {% if donation.receipt %}
+                                            <span class="badge bg-light text-dark border">{{ donation.receipt.receipt_number }}</span>
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <a href="{% url 'staff_donation_detail' donation.id %}" class="btn btn-sm btn-outline-secondary py-0 px-2" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'staff_donation_receipt' donation.id %}" class="btn btn-sm btn-outline-primary py-0 px-2 ms-1" title="Print Receipt">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        <p class="mb-2">No cash donations recorded yet.</p>
+                        <a href="{% url 'staff_donation_add' %}" class="btn btn-sm btn-outline-warning text-dark fw-semibold">
+                            Record First Cash Offering
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Maintenance Records -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-tools me-2 text-primary" style="color: var(--hh-primary, #9a3412) !important;"></i>Recent Maintenance Records
+                    </h5>
+                    <a href="{% url 'staff_maintenance_add' %}" class="btn btn-sm btn-primary fw-semibold" style="background-color: var(--hh-primary, #9a3412); border-color: var(--hh-primary, #9a3412);">
+                        <i class="bi bi-plus-lg me-1"></i>Record Maintenance
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_maintenance %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Title & Asset</th>
+                                    <th>Scheduled Date</th>
+                                    <th>Status</th>
+                                    <th class="pe-3 text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for maint in recent_maintenance %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <span class="fw-semibold text-dark">{{ maint.title }}</span>
+                                        <br><small class="text-muted"><i class="bi bi-box-seam me-1"></i>{{ maint.asset.name }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ maint.scheduled_date|date:"d M Y" }}</small>
+                                    </td>
+                                    <td>
+                                        {% if maint.status == 'Completed' %}
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">Completed</span>
+                                        {% elif maint.status == 'In Progress' %}
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">In Progress</span>
+                                        {% elif maint.status == 'Scheduled' %}
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle">Scheduled</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary border">Cancelled</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <a href="{% url 'staff_maintenance_detail' maint.id %}" class="btn btn-sm btn-outline-secondary py-0 px-2" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'staff_maintenance_edit' maint.id %}" class="btn btn-sm btn-outline-primary py-0 px-2 ms-1" title="Update Record">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-wrench-adjustable fs-1 d-block mb-2"></i>
+                        <p class="mb-2">No maintenance records logged yet.</p>
+                        <a href="{% url 'staff_maintenance_add' %}" class="btn btn-sm btn-outline-primary fw-semibold" style="color: var(--hh-primary, #9a3412); border-color: var(--hh-primary, #9a3412);">
+                            Record First Maintenance
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

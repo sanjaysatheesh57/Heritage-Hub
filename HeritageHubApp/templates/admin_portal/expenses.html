@@ -1,0 +1,154 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Cross-Institutional Expenses - HeritageHub Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb & Header -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Expenses & Financial Oversight</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h3 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-wallet2 text-danger me-2"></i>Expenses & Financial Oversight
+            </h3>
+            <p class="text-muted mb-0">System-wide monitoring of institutional operational disbursements, vendor payments, and expense vouchers.</p>
+        </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-4">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Total Approved Spend</div>
+                <div class="fs-4 fw-bold text-danger">₹{{ approved_expenses_total|floatformat:2 }}</div>
+                <div class="small text-muted">{{ approved_count }} approved vouchers</div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Pending Approvals</div>
+                <div class="fs-4 fw-bold text-warning">₹{{ pending_expenses_total|floatformat:2 }}</div>
+                <div class="small text-muted">{{ pending_count }} pending vouchers</div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Total Recorded Spend</div>
+                <div class="fs-4 fw-bold text-dark">₹{{ total_expenses_sum|floatformat:2 }}</div>
+                <div class="small text-muted">{{ total_count }} total vouchers</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body py-3">
+            <form method="GET" class="row g-2 align-items-center">
+                <!-- Institution Filter -->
+                <div class="col-md-4">
+                    <select name="institution" class="form-select form-select-sm">
+                        <option value="">All Institutions</option>
+                        {% for inst in institutions %}
+                            <option value="{{ inst.id }}" {% if selected_institution == inst.id %}selected{% endif %}>{{ inst.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="col-6 col-md-3">
+                    <select name="category" class="form-select form-select-sm">
+                        <option value="">All Categories</option>
+                        {% for cat_val, cat_label in categories %}
+                            <option value="{{ cat_val }}" {% if selected_category == cat_val %}selected{% endif %}>{{ cat_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="col-6 col-md-3">
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Statuses</option>
+                        <option value="Approved" {% if selected_status == 'Approved' %}selected{% endif %}>Approved</option>
+                        <option value="Pending" {% if selected_status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Rejected" {% if selected_status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">Filter</button>
+                    {% if selected_institution or selected_category or selected_status %}
+                        <a href="{% url 'admin_expense_list' %}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Expenses Table Card -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            {% if expenses %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Title & Description</th>
+                            <th>Institution</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Vendor</th>
+                            <th>Payment Mode</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in expenses %}
+                        <tr>
+                            <td class="text-muted small fw-semibold">{{ e.id }}</td>
+                            <td>
+                                <div class="fw-semibold text-dark">{{ e.title }}</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">{{ e.description|truncatewords:6|default:"—" }}</div>
+                            </td>
+                            <td class="small fw-semibold text-dark">{{ e.institution.name }}</td>
+                            <td><span class="badge bg-light text-dark border small">{{ e.get_expense_category_display }}</span></td>
+                            <td class="fw-bold text-dark">₹{{ e.amount|floatformat:2 }}</td>
+                            <td class="small text-muted">{{ e.vendor_name|default:"—" }}</td>
+                            <td><span class="badge bg-secondary">{{ e.payment_mode }}</span></td>
+                            <td>
+                                {% if e.status == 'Approved' %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Approved</span>
+                                {% elif e.status == 'Pending' %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass me-1"></i>Pending</span>
+                                {% else %}
+                                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ e.expense_date|date:"d M Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-wallet2 fs-1 d-block mb-3 text-secondary"></i>
+                <h5 class="fw-bold mb-1">No Expenses Found</h5>
+                <p class="small mb-0">No expense vouchers match the selected criteria.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

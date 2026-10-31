@@ -1,0 +1,308 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Donation Trends Report - HeritageHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trustee-subnav {
+        background-color: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .trustee-subnav .nav-link {
+        color: var(--hh-text-muted);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    .trustee-subnav .nav-link:hover {
+        color: var(--hh-primary);
+        background-color: #fef3c7;
+    }
+    .trustee-subnav .nav-link.active {
+        color: #fff;
+        background-color: var(--hh-primary);
+    }
+    .report-nav {
+        background: #fff;
+        border: 1px solid var(--hh-border);
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .report-nav .nav-link {
+        color: var(--hh-text);
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.5rem 1.1rem;
+        margin-right: 0.25rem;
+    }
+    .report-nav .nav-link:hover {
+        color: var(--hh-primary);
+        background: #fbfbf9;
+    }
+    .report-nav .nav-link.active {
+        background: var(--hh-gold);
+        color: #fff;
+    }
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .stat-card .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.85rem;
+        color: var(--hh-text-muted);
+        margin-top: 0.25rem;
+    }
+    .chart-container {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--hh-border);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .trend-bar {
+        background: linear-gradient(135deg, var(--hh-gold) 0%, #b45309 100%);
+        border-radius: 4px 4px 0 0;
+        min-width: 32px;
+        transition: height 0.5s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-heart text-danger me-2"></i>
+                Donation Trends & Inflow Analytics
+            </h3>
+            <p class="text-muted mb-0">
+                Tracking received community offerings, channels, and monthly trends for <strong>{{ institution.name }}</strong>
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'trustee_reports_summary_pdf' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-download me-1"></i>Export PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Trustee Sub-Nav -->
+    <nav class="trustee-subnav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_institution_register' %}">
+                    <i class="bi bi-building-add me-1"></i>Register Institution
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_asset_list' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_finance_dashboard' %}">
+                    <i class="bi bi-cash-stack me-1"></i>Finance & Accounts
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_donation_list' %}">
+                    <i class="bi bi-heart me-1"></i>Donations
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_expense_list' %}">
+                    <i class="bi bi-receipt me-1"></i>Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_event_list' %}">
+                    <i class="bi bi-calendar-event me-1"></i>Events & Festivals
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_maintenance_list' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Works
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-graph-up-arrow me-1"></i>Reports & Analytics
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Reporting Sub-Nav -->
+    <nav class="report-nav">
+        <ul class="nav nav-pills flex-wrap">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_overview' %}">
+                    <i class="bi bi-speedometer2 me-1"></i>Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'trustee_reports_donations' %}">
+                    <i class="bi bi-heart me-1"></i>Donation Trends
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_finance' %}">
+                    <i class="bi bi-pie-chart me-1"></i>Fund Utilization
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_assets' %}">
+                    <i class="bi bi-box-seam me-1"></i>Asset Valuation
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_maintenance' %}">
+                    <i class="bi bi-tools me-1"></i>Maintenance Activities
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'trustee_reports_summary' %}">
+                    <i class="bi bi-file-earmark-text me-1"></i>Consolidated Report
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Metric Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-success">₹{{ total_successful|floatformat:2 }}</div>
+                <div class="stat-label">Total Received Donations</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-primary">₹{{ online_total|floatformat:2 }}</div>
+                <div class="stat-label">Online Payments ({{ online_count }})</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-warning">₹{{ cash_total|floatformat:2 }}</div>
+                <div class="stat-label">Cash Offerings ({{ cash_count }})</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-value text-dark">{{ successful_count }}</div>
+                <div class="stat-label">Verified Transactions</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Donation Trend Chart & Summary -->
+    <div class="chart-container mb-4">
+        <h5 class="fw-bold mb-3 text-dark">
+            <i class="bi bi-bar-chart-line text-warning me-2"></i>Monthly Donation Inflow Trends
+        </h5>
+
+        {% if monthly_trends %}
+            <div class="row align-items-end g-3 py-3" style="min-height: 220px;">
+                {% for item in monthly_trends %}
+                    <div class="col text-center">
+                        <div class="small fw-bold text-success mb-1">₹{{ item.amount|floatformat:0 }}</div>
+                        <div class="d-flex justify-content-center align-items-end" style="height: 140px;">
+                            <div class="trend-bar w-100 mx-1" style="height: {% widthratio item.amount total_successful 120 %}px; min-height: 12px;" title="{{ item.month }}: ₹{{ item.amount|floatformat:2 }}"></div>
+                        </div>
+                        <div class="small text-muted mt-2 fw-semibold">{{ item.month }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="border-top pt-3 mt-2 d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Chart displays verified receipts filtered by donation_date</small>
+                <span class="badge bg-success px-3 py-1">Active Ledger</span>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar2-x display-4 text-muted opacity-50 mb-2"></i>
+                <h6 class="fw-semibold mt-2">No Monthly Trend Data Available</h6>
+                <p class="small mb-0">Donations recorded via the Devotee portal or Trustee ledger will populate this trendline.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Donation Ledger Table -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-receipt-cutoff text-warning me-2"></i>Institution Donation Ledger
+            </h5>
+            <span class="badge bg-light text-dark border">{{ donations|length }} record(s)</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Date</th>
+                        <th>Donor Name</th>
+                        <th>Type</th>
+                        <th>Purpose</th>
+                        <th class="text-end pe-4">Amount</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in donations %}
+                        <tr>
+                            <td class="ps-4 text-muted small">{{ d.donation_date|date:"d M Y, h:i A" }}</td>
+                            <td class="fw-semibold text-dark">{{ d.donor_name }}</td>
+                            <td>
+                                <span class="badge {% if d.donation_type == 'Online' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                    {{ d.donation_type }}
+                                </span>
+                            </td>
+                            <td class="text-muted">{{ d.purpose|default:"General Donation" }}</td>
+                            <td class="text-end pe-4 fw-bold {% if d.payment_status == 'Success' %}text-success{% else %}text-muted{% endif %}">
+                                ₹{{ d.amount|floatformat:2 }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge {% if d.payment_status == 'Success' %}bg-success{% elif d.payment_status == 'Pending' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                    {{ d.payment_status }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-2 text-muted opacity-50 mb-2"></i>
+                                <p class="mb-0">No donation records found for this institution.</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

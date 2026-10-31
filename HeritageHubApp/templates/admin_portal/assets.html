@@ -1,0 +1,153 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Cross-Institutional Cultural Assets - HeritageHub Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb & Header -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Cultural Assets</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h3 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-gem text-warning me-2"></i>Cultural Assets Oversight
+            </h3>
+            <p class="text-muted mb-0">System-wide monitoring of cultural heritage artifacts, property, and valuations across institutions.</p>
+        </div>
+    </div>
+
+    <!-- Summary KPI Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Total Cataloged Assets</div>
+                <div class="fs-3 fw-bold text-dark">{{ total_assets }}</div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card border-0 shadow-sm p-3 rounded-3">
+                <div class="small text-muted text-uppercase fw-semibold">Combined Estimated Valuation</div>
+                <div class="fs-3 fw-bold text-success">₹{{ total_valuation|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body py-3">
+            <form method="GET" class="row g-2 align-items-center">
+                <!-- Institution Filter -->
+                <div class="col-md-4">
+                    <select name="institution" class="form-select form-select-sm">
+                        <option value="">All Institutions</option>
+                        {% for inst in institutions %}
+                            <option value="{{ inst.id }}" {% if selected_institution == inst.id %}selected{% endif %}>{{ inst.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Condition Filter -->
+                <div class="col-6 col-md-3">
+                    <select name="condition" class="form-select form-select-sm">
+                        <option value="">All Conditions</option>
+                        <option value="Excellent" {% if selected_condition == 'Excellent' %}selected{% endif %}>Excellent</option>
+                        <option value="Good" {% if selected_condition == 'Good' %}selected{% endif %}>Good</option>
+                        <option value="Needs Maintenance" {% if selected_condition == 'Needs Maintenance' %}selected{% endif %}>Needs Maintenance</option>
+                        <option value="Damaged" {% if selected_condition == 'Damaged' %}selected{% endif %}>Damaged</option>
+                    </select>
+                </div>
+
+                <!-- Asset Type Filter -->
+                <div class="col-6 col-md-3">
+                    <select name="asset_type" class="form-select form-select-sm">
+                        <option value="">All Classifications</option>
+                        <option value="Movable" {% if selected_type == 'Movable' %}selected{% endif %}>Movable</option>
+                        <option value="Immovable" {% if selected_type == 'Immovable' %}selected{% endif %}>Immovable</option>
+                    </select>
+                </div>
+
+                <!-- Actions -->
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">Filter</button>
+                    {% if selected_institution or selected_condition or selected_type %}
+                        <a href="{% url 'admin_asset_list' %}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assets Table Card -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            {% if assets %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Asset Name & Category</th>
+                            <th>Institution</th>
+                            <th>Type</th>
+                            <th>Condition</th>
+                            <th>Storage Location</th>
+                            <th>Valuation</th>
+                            <th class="text-center" style="width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in assets %}
+                        <tr>
+                            <td class="text-muted small fw-semibold">{{ a.id }}</td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ a.name }}</div>
+                                <span class="badge bg-light text-dark border small">{{ a.category }}</span>
+                            </td>
+                            <td class="small fw-semibold text-dark">{{ a.institution.name }}</td>
+                            <td>
+                                <span class="badge {% if a.asset_type == 'Movable' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ a.asset_type }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if a.condition == 'Excellent' %}
+                                    <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i>Excellent</span>
+                                {% elif a.condition == 'Good' %}
+                                    <span class="badge bg-primary">Good</span>
+                                {% elif a.condition == 'Needs Maintenance' %}
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-tools me-1"></i>Needs Maint.</span>
+                                {% else %}
+                                    <span class="badge bg-danger"><i class="bi bi-exclamation-triangle me-1"></i>Damaged</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ a.storage_location|default:"—" }}</td>
+                            <td class="small fw-bold text-dark">₹{{ a.current_valuation|floatformat:2 }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'admin_asset_detail' a.id %}" class="btn btn-sm btn-outline-dark" title="View Dossier">
+                                    <i class="bi bi-eye me-1"></i>Dossier
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-gem fs-1 d-block mb-3 text-secondary"></i>
+                <h5 class="fw-bold mb-1">No Assets Found</h5>
+                <p class="small mb-0">No cultural assets match the selected criteria.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HeritageHub - Cultural Heritage Asset & Trust MIS{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom HeritageHub CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Header & Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark hh-navbar sticky-top">
+        <div class="container">
+            <a class="navbar-brand hh-brand" href="{% url 'home' %}">
+                <i class="bi bi-bank2"></i>
+                <span>HeritageHub</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link hh-nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+                            <i class="bi bi-house-door me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link hh-nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">
+                            <i class="bi bi-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link hh-nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}">
+                            <i class="bi bi-envelope me-1"></i>Contact
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link hh-nav-link {% if request.resolver_match.url_name == 'public_transparency_reports' %}active{% endif %}" href="{% url 'public_transparency_reports' %}">
+                            <i class="bi bi-journal-text me-1"></i>Public Reports
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- User & Auth Area -->
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                    {% if request.user.is_authenticated %}
+                        <!-- User Identity & Profile Dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-dark text-light border-0 dropdown-toggle d-flex align-items-center gap-2 px-2 py-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(255,255,255,0.1); border-radius: 20px;">
+                                <i class="bi bi-person-circle fs-6 text-warning"></i>
+                                <span class="fw-semibold small">{{ request.user.username }}</span>
+                                {% if request.user.userprofile %}
+                                    <span class="badge {% if request.user.userprofile.role == 'Trustee' %}badge-role-trustee{% elif request.user.userprofile.role == 'Staff' %}badge-role-staff{% elif request.user.userprofile.role == 'Devotee' %}badge-role-devotee{% elif request.user.userprofile.role == 'Admin' %}bg-danger text-white{% endif %} px-2 py-0" style="font-size: 0.75rem;">
+                                        {{ request.user.userprofile.role }}
+                                    </span>
+                                {% elif request.user.is_superuser %}
+                                    <span class="badge bg-secondary px-2 py-0" style="font-size: 0.75rem;">Admin</span>
+                                {% endif %}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li class="dropdown-header small text-uppercase">Signed in as <strong>{{ request.user.username }}</strong></li>
+                                {% if request.user.userprofile.role == 'Devotee' %}
+                                    <li><a class="dropdown-item" href="{% url 'devotee_profile' %}"><i class="bi bi-person me-2 text-primary"></i>My Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'devotee_donation_history' %}"><i class="bi bi-clock-history me-2 text-warning"></i>Donation History</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'devotee_donate' %}"><i class="bi bi-heart me-2 text-danger"></i>Make Donation</a></li>
+                                {% elif request.user.userprofile.role == 'Trustee' %}
+                                    <li><a class="dropdown-item" href="{% url 'trustee_dashboard' %}"><i class="bi bi-speedometer2 me-2 text-warning"></i>Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'trustee_staff_list' %}"><i class="bi bi-people me-2 text-info"></i>Staff Members</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'trustee_institution_register' %}"><i class="bi bi-building-add me-2 text-primary"></i>Register Institution</a></li>
+                                {% elif request.user.userprofile.role == 'Staff' %}
+                                    <li><a class="dropdown-item" href="{% url 'staff_dashboard' %}"><i class="bi bi-speedometer2 me-2 text-info"></i>Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'staff_donation_add' %}"><i class="bi bi-cash-coin me-2 text-success"></i>Record Cash Donation</a></li>
+                                {% elif request.user.userprofile.role == 'Admin' %}
+                                    <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2 me-2 text-warning"></i>Admin Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_user_approval_list' %}"><i class="bi bi-person-check me-2 text-success"></i>User Approvals</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_institution_list' %}"><i class="bi bi-building-check me-2 text-primary"></i>Institutions Review</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_user_list' %}"><i class="bi bi-people me-2 text-info"></i>Users Directory</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_audit_log_list' %}"><i class="bi bi-journal-text me-2 text-secondary"></i>Audit Log Viewer</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_reports_overview' %}"><i class="bi bi-graph-up me-2 text-danger"></i>System Reports</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</a></li>
+                            </ul>
+                        </div>
+
+                        {% if request.user.userprofile.role == 'Devotee' %}
+                            <a class="btn btn-sm btn-heritage-gold" href="{% url 'devotee_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                            </a>
+                        {% elif request.user.userprofile.role == 'Staff' %}
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-grid me-1"></i>Operations
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                    <li><a class="dropdown-item" href="{% url 'staff_donation_list' %}"><i class="bi bi-cash me-2 text-success"></i>Cash Donations</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'staff_maintenance_list' %}"><i class="bi bi-tools me-2 text-primary"></i>Maintenance Works</a></li>
+                                </ul>
+                            </div>
+                            <a class="btn btn-sm btn-heritage-gold" href="{% url 'staff_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                            </a>
+                        {% elif request.user.userprofile.role == 'Trustee' %}
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-grid-3x3-gap me-1"></i>Management
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                    <li><a class="dropdown-item" href="{% url 'trustee_asset_list' %}"><i class="bi bi-box-seam me-2 text-warning"></i>Assets</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'trustee_finance_dashboard' %}"><i class="bi bi-cash-stack me-2 text-success"></i>Finance & Accounts</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'trustee_event_list' %}"><i class="bi bi-calendar-event me-2 text-primary"></i>Events</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'trustee_maintenance_list' %}"><i class="bi bi-tools me-2 text-secondary"></i>Maintenance</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'trustee_staff_list' %}"><i class="bi bi-people me-2 text-info"></i>Staff Members</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'trustee_reports_overview' %}"><i class="bi bi-graph-up-arrow me-2 text-info"></i>Reports & Analytics</a></li>
+                                </ul>
+                            </div>
+                            <a class="btn btn-sm btn-heritage-gold" href="{% url 'trustee_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                            </a>
+                        {% elif request.user.userprofile.role == 'Admin' %}
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-shield-lock-fill me-1"></i>Administration
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                    <li><a class="dropdown-item" href="{% url 'admin_user_approval_list' %}"><i class="bi bi-person-check me-2 text-warning"></i>User Approvals</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_institution_list' %}"><i class="bi bi-building-check me-2 text-primary"></i>Institutions</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_user_list' %}"><i class="bi bi-people me-2 text-info"></i>All Users</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_asset_list' %}"><i class="bi bi-gem me-2 text-warning"></i>Assets Oversight</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_donation_list' %}"><i class="bi bi-cash-stack me-2 text-success"></i>Donations & Finance</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_maintenance_list' %}"><i class="bi bi-tools me-2 text-secondary"></i>Maintenance Works</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_event_list' %}"><i class="bi bi-calendar-event me-2 text-primary"></i>Events</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_audit_log_list' %}"><i class="bi bi-journal-text me-2 text-dark"></i>Audit Log Viewer</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'admin_reports_overview' %}"><i class="bi bi-graph-up me-2 text-danger"></i>System Reports</a></li>
+                                </ul>
+                            </div>
+                            <a class="btn btn-sm btn-heritage-gold" href="{% url 'admin_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                            </a>
+
+                        {% endif %}
+
+                        <a class="btn btn-sm btn-outline-danger ms-1" href="{% url 'logout' %}" title="Logout">
+                            <i class="bi bi-box-arrow-right"></i><span class="d-none d-sm-inline ms-1">Logout</span>
+                        </a>
+                    {% else %}
+                        <a class="btn btn-sm btn-outline-light me-1" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </a>
+                        <a class="btn btn-sm btn-heritage-gold" href="{% url 'register' %}">
+                            <i class="bi bi-person-plus me-1"></i>Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Global Django Messages -->
+    <div class="container mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% elif message.tags == 'error' or message.tags == 'danger' %}bi-exclamation-triangle-fill text-danger{% else %}bi-info-circle-fill text-primary{% endif %} me-2 fs-5"></i>
+                    <div>{{ message }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main Content Block -->
+    <main class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Minimal Footer -->
+    <footer class="hh-footer py-4">
+        <div class="container">
+            <div class="row align-items-center gy-3">
+                <div class="col-md-7 text-center text-md-start">
+                    <div class="hh-brand d-inline-flex mb-1" style="font-size: 1.25rem;">
+                        <i class="bi bi-bank2"></i>
+                        <span>HeritageHub</span>
+                    </div>
+                    <p class="small mb-0" style="color: #a8a29e;">
+                        Cultural Heritage Asset and Trust Management Information System
+                    </p>
+                </div>
+                <div class="col-md-5 text-center text-md-end">
+                    <div class="d-flex justify-content-center justify-content-md-end gap-3 small flex-wrap">
+                        <a href="{% url 'home' %}">Home</a>
+                        <a href="{% url 'about' %}">About</a>
+                        <a href="{% url 'contact' %}">Contact</a>
+                        <a href="{% url 'public_transparency_reports' %}">Public Reports</a>
+                        <a href="{% url 'login' %}">Login</a>
+                        <a href="{% url 'register' %}">Register</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

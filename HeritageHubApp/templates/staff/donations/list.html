@@ -1,0 +1,158 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title %}Cash Donations — {{ institution.name }} — HeritageHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'staff_dashboard' %}">Staff Portal</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Cash Donations</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-cash-stack me-2 text-warning"></i>Cash Donations Ledger
+            </h2>
+            <p class="text-muted mb-0">{{ institution.name }} &bull; Counter Collections & Physical Offerings</p>
+        </div>
+        <div>
+            <a href="{% url 'staff_donation_add' %}" class="btn btn-warning fw-semibold text-dark shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i>Record Cash Donation
+            </a>
+        </div>
+    </div>
+
+    <!-- Secondary Sub-Navigation -->
+    <ul class="nav nav-pills mb-4 border-bottom pb-2">
+        <li class="nav-item">
+            <a class="nav-link text-dark fw-semibold" href="{% url 'staff_dashboard' %}">
+                <i class="bi bi-speedometer2 me-1"></i>Dashboard Overview
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active fw-semibold" href="{% url 'staff_donation_list' %}">
+                <i class="bi bi-cash-stack me-1"></i>Cash Donations
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark fw-semibold" href="{% url 'staff_maintenance_list' %}">
+                <i class="bi bi-tools me-1"></i>Maintenance Works
+            </a>
+        </li>
+    </ul>
+
+    <!-- Quick Stats Banner -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 bg-light p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-bold">Total Cash Donations Recorded</span>
+                        <h4 class="fw-bold text-dark mb-0">{{ total_cash_count }} Contribution{{ total_cash_count|pluralize }}</h4>
+                    </div>
+                    <div class="bg-warning-subtle text-warning p-2 rounded-3">
+                        <i class="bi bi-receipt fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 bg-light p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small text-uppercase fw-bold">Total Physical Cash Amount</span>
+                        <h4 class="fw-bold text-success mb-0">₹{{ total_cash_amount|floatformat:2 }}</h4>
+                    </div>
+                    <div class="bg-success-subtle text-success p-2 rounded-3">
+                        <i class="bi bi-currency-rupee fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donations Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-dark">
+                <i class="bi bi-table me-2"></i>Physical Cash Donations ({{ donations|length }})
+            </span>
+            <span class="badge bg-secondary-subtle text-secondary">Offline Counter Offerings Only</span>
+        </div>
+        <div class="card-body p-0">
+            {% if donations %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Receipt No.</th>
+                            <th>Date & Time</th>
+                            <th>Donor Name</th>
+                            <th>Purpose</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th class="pe-3 text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for donation in donations %}
+                        <tr>
+                            <td class="ps-3">
+                                {% if donation.receipt %}
+                                    <span class="badge bg-light text-dark border font-monospace">{{ donation.receipt.receipt_number }}</span>
+                                {% else %}
+                                    <span class="text-muted font-monospace">{{ donation.transaction_id }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="text-dark">{{ donation.donation_date|date:"d M Y" }}</span>
+                                <br><small class="text-muted">{{ donation.donation_date|date:"h:i A" }}</small>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-dark">{{ donation.donor_name }}</span>
+                                {% if donation.donor_email %}
+                                    <br><small class="text-muted"><i class="bi bi-envelope me-1"></i>{{ donation.donor_email }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ donation.purpose }}</span>
+                            </td>
+                            <td>
+                                <span class="fw-bold text-success">₹{{ donation.amount|floatformat:2 }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="bi bi-check-circle me-1"></i>Success
+                                </span>
+                            </td>
+                            <td class="pe-3 text-end">
+                                <a href="{% url 'staff_donation_detail' donation.id %}" class="btn btn-sm btn-outline-secondary" title="View Details">
+                                    <i class="bi bi-eye me-1"></i>Details
+                                </a>
+                                <a href="{% url 'staff_donation_receipt' donation.id %}" class="btn btn-sm btn-outline-primary ms-1" title="View / Print Receipt">
+                                    <i class="bi bi-printer me-1"></i>Receipt
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
+                <h5 class="fw-bold text-dark">No Cash Donations Recorded Yet</h5>
+                <p class="mb-3">Manual cash offerings collected at the temple counter will appear here once recorded.</p>
+                <a href="{% url 'staff_donation_add' %}" class="btn btn-warning text-dark fw-semibold">
+                    <i class="bi bi-plus-circle me-1"></i>Record Cash Donation Now
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

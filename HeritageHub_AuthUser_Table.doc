@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>HeritageHub - auth_user Table Specification</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  body {
+    font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.4;
+    color: #292524;
+    padding: 30px;
+  }
+  h1 {
+    color: #9a3412;
+    font-size: 22pt;
+    margin-bottom: 4px;
+    border-bottom: 2px solid #9a3412;
+    padding-bottom: 6px;
+  }
+  .subtitle {
+    color: #78716c;
+    font-size: 12pt;
+    font-style: italic;
+    margin-bottom: 25px;
+  }
+  .table-title {
+    color: #1c1917;
+    font-size: 13pt;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 24px;
+    mso-table-lspace: 0pt;
+    mso-table-rspace: 0pt;
+  }
+  th {
+    background-color: #d97706;
+    color: #ffffff;
+    font-weight: bold;
+    text-align: left;
+    padding: 8px 10px;
+    border: 1px solid #b45309;
+    font-size: 10.5pt;
+  }
+  td {
+    padding: 7px 10px;
+    border: 1px solid #d6d3d1;
+    font-size: 10pt;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td {
+    background-color: #fbfbf9;
+  }
+  .pk {
+    font-weight: bold;
+    color: #b45309;
+  }
+</style>
+</head>
+<body>
+
+<h1>HERITAGEHUB</h1>
+<div class="subtitle">Authentication Framework Table Specification</div>
+
+<div class="table-title">10. auth_user: Stores user authentication credentials</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width: 20%;">Column</th>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 25%;">Constraints</th>
+      <th style="width: 40%;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>id</b></td>
+      <td>Int(11)</td>
+      <td class="pk">Primary Key</td>
+      <td>User ID</td>
+    </tr>
+    <tr>
+      <td><b>username</b></td>
+      <td>Varchar(150)</td>
+      <td>Unique, Not Null</td>
+      <td>Login username</td>
+    </tr>
+    <tr>
+      <td><b>password</b></td>
+      <td>Varchar(128)</td>
+      <td>Not Null</td>
+      <td>Hashed password (PBKDF2)</td>
+    </tr>
+    <tr>
+      <td><b>email</b></td>
+      <td>Varchar(254)</td>
+      <td>Nullable</td>
+      <td>Registered email address</td>
+    </tr>
+    <tr>
+      <td><b>is_active</b></td>
+      <td>TinyInt(1)</td>
+      <td>Not Null</td>
+      <td>Active account flag (1=Active, 0=Disabled)</td>
+    </tr>
+    <tr>
+      <td><b>date_joined</b></td>
+      <td>DateTime</td>
+      <td>Not Null</td>
+      <td>Account creation timestamp</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

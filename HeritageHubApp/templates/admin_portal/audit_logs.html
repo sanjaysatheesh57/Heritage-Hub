@@ -1,0 +1,119 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}System Audit Trail - HeritageHub Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb & Header -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Audit Log Viewer</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h3 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-journal-text text-primary me-2"></i>System Audit Trail
+            </h3>
+            <p class="text-muted mb-0">Audit Log Viewer for administrative actions, user verifications, donations, and institutional modifications.</p>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-body py-3">
+            <form method="GET" class="row g-2 align-items-center">
+                <!-- Search Query -->
+                <div class="col-md-5">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control" placeholder="Search by action, description..." value="{{ search_query }}">
+                    </div>
+                </div>
+
+                <!-- User Filter -->
+                <div class="col-md-4">
+                    <select name="user_id" class="form-select form-select-sm">
+                        <option value="">All Users</option>
+                        {% for u in users %}
+                            <option value="{{ u.id }}" {% if selected_user_id == u.id %}selected{% endif %}>{{ u.username }} ({{ u.get_full_name|default:u.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="col-md-3 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">Search Logs</button>
+                    {% if search_query or selected_user_id %}
+                        <a href="{% url 'admin_audit_log_list' %}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Audit Logs Table Card -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h6 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-list-columns-reverse me-2"></i>Log Records ({{ total_count }})
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            {% if logs %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th style="width: 70px;">Log ID</th>
+                            <th style="min-width: 150px;">Timestamp</th>
+                            <th>Actor / User</th>
+                            <th>Action Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td class="text-muted small fw-semibold">#{{ log.id }}</td>
+                            <td class="small text-muted">
+                                {{ log.timestamp|date:"d M Y" }}<br>
+                                <span class="text-muted" style="font-size: 0.75rem;">{{ log.timestamp|date:"h:i:s A" }}</span>
+                            </td>
+                            <td>
+                                {% if log.user %}
+                                    <span class="fw-semibold text-dark">{{ log.user.username }}</span>
+                                    {% if log.user.userprofile %}
+                                        <span class="badge bg-light text-dark border small ms-1">{{ log.user.userprofile.role }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted font-monospace small">System / Anonymous</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ log.action }}</span>
+                            </td>
+                            <td class="small text-dark" style="max-width: 450px;">
+                                {{ log.description }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
+                <h5 class="fw-bold mb-1">No Audit Logs Found</h5>
+                <p class="small mb-0">No records match the selected search query or user filter.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

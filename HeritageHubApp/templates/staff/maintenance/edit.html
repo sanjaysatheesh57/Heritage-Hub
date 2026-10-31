@@ -1,0 +1,193 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title %}Update Maintenance #{{ maintenance.id }} — {{ institution.name }} — HeritageHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb & Header -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{% url 'staff_dashboard' %}">Staff Portal</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'staff_maintenance_list' %}">Maintenance</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'staff_maintenance_detail' maintenance.id %}">Work #{{ maintenance.id }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Update Work Progress</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-pencil-square me-2 text-primary" style="color: var(--hh-primary, #9a3412) !important;"></i>Update Maintenance Record
+        </h2>
+        <p class="text-muted mb-0">Record #{{ maintenance.id }} &bull; {{ institution.name }}</p>
+    </div>
+
+    <!-- Error Alerts -->
+    {% if errors %}
+    <div class="alert alert-danger shadow-sm border-0 mb-4">
+        <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+            <strong class="fs-6">Please correct the following errors:</strong>
+        </div>
+        <ul class="mb-0 ps-3">
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Edit Form -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-gear-wide-connected me-2 text-primary" style="color: var(--hh-primary, #9a3412) !important;"></i>Modify Maintenance Information
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{% url 'staff_maintenance_edit' maintenance.id %}" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-semibold">
+                                Maintenance Work Title <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="title" name="title"
+                                   value="{{ request.POST.title|default:maintenance.title }}" required>
+                            <div class="form-text">Title of the conservation or repair work.</div>
+                        </div>
+
+                        <!-- Asset Selection -->
+                        <div class="mb-3">
+                            <label for="asset" class="form-label fw-semibold">
+                                Target Cultural Asset <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="asset" name="asset" required>
+                                {% for a in assets %}
+                                    <option value="{{ a.id }}" {% if request.POST.asset %}{% if request.POST.asset|stringformat:"s" == a.id|stringformat:"s" %}selected{% endif %}{% else %}{% if maintenance.asset_id == a.id %}selected{% endif %}{% endif %}>
+                                        {{ a.name }} ({{ a.get_asset_type_display }}) &bull; Condition: {{ a.condition }}
+                                    </option>
+                                {% empty %}
+                                    <option disabled>No assets registered for this institution</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Must be an asset belonging to {{ institution.name }}.</div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-semibold">
+                                Description & Scope of Work
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ request.POST.description|default:maintenance.description }}</textarea>
+                        </div>
+
+                        <!-- Dates Row -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="scheduled_date" class="form-label fw-semibold">
+                                    Scheduled Execution Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="scheduled_date" name="scheduled_date"
+                                       value="{{ request.POST.scheduled_date|default:maintenance.scheduled_date|date:'Y-m-d' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="completion_date" class="form-label fw-semibold">
+                                    Completion Date <small class="text-muted font-monospace">(Optional)</small>
+                                </label>
+                                <input type="date" class="form-control" id="completion_date" name="completion_date"
+                                       value="{{ request.POST.completion_date|default:maintenance.completion_date|date:'Y-m-d'|default:'' }}">
+                                <div class="form-text">Cannot be earlier than scheduled date.</div>
+                            </div>
+                        </div>
+
+                        <!-- Costs Row -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="estimated_cost" class="form-label fw-semibold">
+                                    Estimated Budget (INR)
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" step="0.01" min="0" class="form-control"
+                                           id="estimated_cost" name="estimated_cost"
+                                           value="{{ request.POST.estimated_cost|default:maintenance.estimated_cost }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="actual_cost" class="form-label fw-semibold">
+                                    Actual Incurred Cost (INR)
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" step="0.01" min="0" class="form-control"
+                                           id="actual_cost" name="actual_cost"
+                                           value="{{ request.POST.actual_cost|default:maintenance.actual_cost }}">
+                                </div>
+                                <div class="form-text">Update when conservation expenses are finalized.</div>
+                            </div>
+                        </div>
+
+                        <!-- Status Selection -->
+                        <div class="mb-4">
+                            <label for="status" class="form-label fw-semibold">
+                                Work Progress Status <span class="text-danger">*</span>
+                            </label>
+                            {% with current_st=request.POST.status|default:maintenance.status %}
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="Scheduled" {% if current_st == 'Scheduled' %}selected{% endif %}>
+                                    Scheduled (Work planned but not yet commenced)
+                                </option>
+                                <option value="In Progress" {% if current_st == 'In Progress' %}selected{% endif %}>
+                                    In Progress (Active conservation in progress)
+                                </option>
+                                <option value="Completed" {% if current_st == 'Completed' %}selected{% endif %}>
+                                    Completed (Finished and verified)
+                                </option>
+                                <option value="Cancelled" {% if current_st == 'Cancelled' %}selected{% endif %}>
+                                    Cancelled (Withdrawn or postponed)
+                                </option>
+                            </select>
+                            {% endwith %}
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                            <a href="{% url 'staff_maintenance_detail' maintenance.id %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Cancel & Return
+                            </a>
+                            <button type="submit" class="btn btn-primary fw-semibold px-4 py-2 shadow-sm" style="background-color: var(--hh-primary, #9a3412); border-color: var(--hh-primary, #9a3412);">
+                                <i class="bi bi-save me-1"></i>Save Updates
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4 bg-light">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-info-circle me-2 text-primary"></i>Record Status & Integrity
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">
+                        Updating this maintenance work will log an entry in the system audit trail:
+                    </p>
+                    <div class="bg-white p-2 rounded border small mb-3">
+                        <code>AuditLog: action="Maintenance Updated"</code>
+                    </div>
+                    <small class="text-muted">
+                        Completed works and actual expenditure figures are automatically aggregated in trustee governance reports and public transparency portals.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
