@@ -11,7 +11,7 @@ HeritageHub provides a unified, transparent platform that addresses the operatio
 - **Cultural Asset Documentation**: Cataloging priceless movable and immovable artifacts with valuations, physical condition tracking, and photographic archives.
 - **Fiduciary Accountability**: Dual-step expenditure authorization, multi-channel donation recording (simulated online offerings & on-premise cash receipts), and real-time available fund calculations.
 - **Conservation & Festival Lifecycle**: Tracking asset-specific conservation works and scheduling religious and cultural events.
-- **Multi-Role Governance & Oversight**: Strict Role-Based Access Control (RBAC) ensuring dedicated portals for System Administrators, Institution Trustees, Counter Staff, Devotees, and the General Public.
+- **Multi-Role Governance & Oversight**: Strict Role-Based Access Control (RBAC) across four (4) user roles: System Administrators, Institution Trustees, Counter Staff, and Devotees.
 
 ---
 
@@ -38,34 +38,31 @@ HeritageHub provides a unified, transparent platform that addresses the operatio
 - **Donation History & Receipt Lookup**: Searchable ledger of on-premise donations with printable computerized receipts.
 - **Conservation Maintenance Tracking**: Logs physical maintenance progress (Scheduled, In Progress, Completed), updates actual costs, and inspects linked cultural asset dossiers with uploaded photographs for visual identification.
 
-### 4. Devotee & Civic Portal (`/devotee/`)
+### 4. Devotee Portal (`/devotee/`)
 - **Civic Registration & Secure Authentication**: Instant self-service account registration.
 - **Online Offerings (Simulated Payment Gateway)**: Secure multi-step donation workflow supporting UPI, Debit/Credit Card, and NetBanking simulation without charging real payment instruments.
 - **Automated Computerized Receipts**: Instant generation of unique digital receipts (`HH-REC-...`) with printable, tamper-evident layouts.
 - **Personal Donation History**: Comprehensive tracking of all personal offerings and contributions.
 - **Devotee Profile Management**: Personal contact and profile information maintenance.
 
-### 5. Public Transparency Portal (`/reports/` & Common Pages)
-- **Public Institutional Registry**: Information on registered and approved heritage institutions.
-- **Public Transparency Reports**: Aggregated financial transparency summaries presenting total donations collected and approved conservation spend per institution, safeguarding donor privacy with zero personally identifiable information (PII) disclosure.
+*(Note: Unauthenticated public visitors can also access general information pages, the institutional directory, and aggregated public transparency reports at `/reports/` without requiring an account).*
 
 ---
 
 ## 3. User Roles & Access Control Hierarchy
 
-The system strictly enforces Role-Based Access Control (RBAC) across four authenticated user roles plus unauthenticated public visitors:
+The system strictly enforces Role-Based Access Control (RBAC) across **four (4) distinct user roles** defined in the `UserProfile` model:
 
 | Role | Access Level | Primary Responsibilities & Functional Scope |
 | :--- | :--- | :--- |
-| **Admin** | System-Wide | Verifies institution applications, approves Trustee and Staff user accounts, exercises cross-institutional oversight across all assets, donations, expenses, and audit trails. Uses a dedicated, fully customized Admin Portal. |
+| **Admin** | System-Wide | Verifies institution applications, approves Trustee and Staff user accounts, exercises cross-institutional oversight across all assets, donations, expenses, and audit trails. Uses a dedicated, fully customized Admin Portal (`/admin-portal/`). |
 | **Trustee** | Institution-Level | Executive authority for an approved institution. Manages asset registers, approves/rejects expenditure requests, schedules events, monitors maintenance, and accesses institutional financial reports and PDF exports. |
-| **Staff** | Institution-Level | Operational counter staff. Logs on-premise cash donations, issues counter receipts, logs asset maintenance progress, and inspects linked asset photographs. Cannot approve expenses or alter asset valuations. |
-| **Devotee** | User-Level | General public and donors. Browses approved institutions, makes simulated online donations, downloads receipts, and reviews personal donation history. |
-| **Public** | Unauthenticated | Explores the public portal, reads institution information, submits contact inquiries, and views public transparency reports. |
+| **Staff** | Institution-Level | Operational counter staff. Logs on-premise cash donations, issues counter receipts (`HH-CASH-...`), logs asset maintenance progress, and inspects linked asset photographs. Cannot approve expenses or alter asset valuations. |
+| **Devotee** | User-Level | General public and registered donors. Browses approved institutions, makes simulated online donations, downloads receipts (`HH-REC-...`), and reviews personal contribution history. |
 
 ### Access Control & Governance Safeguards
-- **Custom RBAC Decorators**: Functional views are guarded by `@admin_required`, `@trustee_required`, `@staff_required`, and `@devotee_required` decorators, returning HTTP 403 Forbidden on unauthorized role attempts.
-- **Approval Gate**: Newly registered Trustee and Staff accounts are created in `Pending` approval status and locked out of functional dashboards until verified and approved by a System Administrator.
+- **Custom RBAC Decorators**: Functional views are guarded by 4 role decorators: `@admin_required`, `@trustee_required`, `@staff_required`, and `@devotee_required`. Unauthorized access attempts return HTTP 403 Forbidden.
+- **Approval Gate**: Newly registered Trustee and Staff accounts are created in `Pending` approval status and locked out of functional dashboards until verified and approved by a System Administrator. Devotee accounts are immediately active upon registration.
 - **Multi-Tenant Isolation**: Trustee and Staff queries are strictly partitioned by `request.user.userprofile.institution`. Cross-institutional access or data tampering is blocked at the database query level.
 - **Dedicated Admin Experience**: All administrative functions are performed via the tailored `/admin-portal/` interface. Technical Django admin links (`/admin/`) are omitted from public and role-facing navigation for clean UI isolation.
 
